@@ -5,6 +5,10 @@
 
 ---
 ## System architecture
+
+## 🏗️ System Architecture
+
+```text
                                👤 USER
                                   │
                  ┌────────────────┴────────────────┐
@@ -45,27 +49,26 @@
              └────────────┬───────┘
                           │
                           ▼
-                Analysis Engine
+                  Analysis Engine
                           │
       ┌───────────────────┼────────────────────┐
       ▼                   ▼                    ▼
- Pandas Analysis     DuckDB SQL          Dashboard Builder
+ Pandas Analysis     DuckDB SQL        Dashboard Builder
       │                   │                    │
       ├──────────────┬────┴────────────┐
       ▼              ▼                 ▼
  Anomaly        Forecasting      Chart Generator
- Detection        (Prophet)       (Recharts)
+ Detection        (Prophet)        (Recharts)
 (Isolation Forest)
       │
       ▼
-     Groq LLM
- (Explanation Only)
+ Groq LLM (Explanation Only)
       │
       ▼
  Response Formatter
       │
- ┌────┼───────────────┬────────────────┐
- ▼    ▼               ▼                ▼
+ ┌────┼───────────────┬──────────────┐
+ ▼    ▼               ▼              ▼
 Text Charts      SQL Result      Insights
       │
       ▼
@@ -80,6 +83,8 @@ PDF  DOCX   Google Drive Upload
       │
       ▼
  React Dashboard
+```
+
 ---
 
 ## 🚀 Quick Start
