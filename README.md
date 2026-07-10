@@ -4,6 +4,83 @@
 > React (Frontend) • FastAPI + Groq LLM (Backend) • MongoDB Auth • File-based Storage
 
 ---
+## System architecture
+                               👤 USER
+                                  │
+                 ┌────────────────┴────────────────┐
+                 │                                 │
+           Ask Question                    Upload CSV Dataset
+                 │                                 │
+                 └────────────────┬────────────────┘
+                                  │
+                                  ▼
+                  React Frontend (TanStack Start)
+                                  │
+                                  ▼
+                    JWT Authentication (MongoDB)
+                                  │
+                                  ▼
+                        FastAPI Backend API
+                                  │
+             ┌────────────────────┼────────────────────┐
+             │                    │                    │
+             ▼                    ▼                    ▼
+      Dataset Service      Chat Service       Report Service
+             │                    │
+             ▼                    ▼
+      CSV Validation      Intent Classification
+             │                    │
+             ▼                    ▼
+      Pandas CSV Parser     Tool Routing Engine
+             │                    │
+             ▼                    │
+     Data Cleaning & Validation   │
+             │                    │
+             ▼                    │
+ Quality Score & Metadata          │
+             │                    │
+             ▼                    ▼
+      Dataset Registry      Load Dataset
+             │                    │
+             └────────────┬───────┘
+                          │
+                          ▼
+                Analysis Engine
+                          │
+      ┌───────────────────┼────────────────────┐
+      ▼                   ▼                    ▼
+ Pandas Analysis     DuckDB SQL          Dashboard Builder
+      │                   │                    │
+      ├──────────────┬────┴────────────┐
+      ▼              ▼                 ▼
+ Anomaly        Forecasting      Chart Generator
+ Detection        (Prophet)       (Recharts)
+(Isolation Forest)
+      │
+      ▼
+     Groq LLM
+ (Explanation Only)
+      │
+      ▼
+ Response Formatter
+      │
+ ┌────┼───────────────┬────────────────┐
+ ▼    ▼               ▼                ▼
+Text Charts      SQL Result      Insights
+      │
+      ▼
+ Report Generator
+      │
+ ┌────┼──────────────┐
+ ▼    ▼              ▼
+PDF  DOCX   Google Drive Upload
+      │
+      ▼
+ Final API Response
+      │
+      ▼
+ React Dashboard
+---
 
 ## 🚀 Quick Start
 
