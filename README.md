@@ -186,26 +186,3 @@ GOOGLE_DRIVE_FOLDER_ID=your_folder_id
 | [`PROJECT_SUMMARY.md`](./PROJECT_SUMMARY.md) | Full conversation history, tech stack, API overview, troubleshooting |
 
 ---
-
-## 🧭 Navigation Guide
-
-| If you want to... | Start here |
-|-------------------|------------|
-| Understand the overall system | This README (diagrams above) |
-| Modify authentication | `PROCESS_OF_BACKEND.md` §11 + `PROCESS_OF_FRONTEND.md` §2/§11 |
-| Add a new chart type | `PROCESS_OF_BACKEND.md` §6 + `PROCESS_OF_FRONTEND.md` §4 |
-| Extend the chat agent | `PROCESS_OF_BACKEND.md` §7 (chat_service.py) |
-| Customize report output | `PROCESS_OF_BACKEND.md` §10 (report_service.py) |
-| Add a new API endpoint | `PROCESS_OF_BACKEND.md` §9 + `PROCESS_OF_FRONTEND.md` §6/§10 |
-| Debug a production issue | `PROJECT_SUMMARY.md` → Troubleshooting table |
-
----
-
-## 🏷️ Version & License
-
-**Version:** 1.0.0 (Active Development)  
-**License:** MIT — See [LICENSE](./LICENSE) if present
-
----
-
-*Generated from project documentation. Diagrams render natively on GitHub/GitLab/Bitbucket.*# AI-DATA-ANALYSIS-DBO
