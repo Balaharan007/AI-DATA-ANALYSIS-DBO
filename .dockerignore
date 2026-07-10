@@ -1,0 +1,68 @@
+# =============================================================================
+# Docker ignore - files/folders NOT copied to build context
+# =============================================================================
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend
+backend/.venv/
+backend/__pycache__/
+backend/*.pyc
+backend/*.pyo
+backend/*.pyd
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.coverage
+backend/htmlcov/
+backend/*.egg-info/
+backend/dist/
+backend/build/
+backend/data/
+backend/*.log
+backend/.env
+backend/.env.local
+backend/.env.*.local
+
+# Frontend
+frontend/node_modules/
+frontend/.output/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/*.log
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+frontend/.DS_Store
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation (optional - keep if you want docs in image)
+# *.md
+# !README.md
+
+# Test outputs
+*.xml
+*.json
+
+# Misc
+*.tar.gz
+*.zip
+*.bak
+*.tmp
+*.temp

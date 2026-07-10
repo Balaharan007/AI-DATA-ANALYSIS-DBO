@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # MongoDB for authentication
+  mongodb:
+    image: mongo:7
+    container_name: insight-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: information_users
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API (FastAPI)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: insight-backend
+    restart: unless-stopped
+    environment:
+      # Required
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - MONGODB_URL=mongodb://mongodb:27017
+      - MONGODB_DB_NAME=information_users
+      - MONGODB_USERS_COLLECTION=users
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ALGORITHM=HS256
+      - JWT_ACCESS_TOKEN_EXPIRE_MINUTES=10080
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:3000,http://localhost:8080,http://frontend:5173
+
+      # Optional - Google Drive
+      - GOOGLE_DRIVE_ENABLED=${GOOGLE_DRIVE_ENABLED:-false}
+      - GOOGLE_DRIVE_CREDENTIALS_PATH=${GOOGLE_DRIVE_CREDENTIALS_PATH}
+      - GOOGLE_DRIVE_FOLDER_ID=${GOOGLE_DRIVE_FOLDER_ID}
+
+      # Runtime
+      - PORT=8000
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "8000:8000"
+    volumes:
+      - backend_data:/app/backend/data
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend (TanStack Start SSR)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: insight-frontend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=5173
+      - HOST=0.0.0.0
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  mongodb_data:
+  backend_data:
+
+networks:
+  default:
+    name: insight-network

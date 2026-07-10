@@ -1,0 +1,46 @@
+# Frontend Dockerfile - TanStack Start (SSR)
+# Builds the React frontend for production
+
+# =============================================================================
+# STAGE 1: Build frontend
+# =============================================================================
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY frontend/package.json frontend/package-lock.json* ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy frontend source
+COPY frontend/ .
+
+# Build frontend (TanStack Start)
+RUN npm run build
+
+# =============================================================================
+# STAGE 2: Production runtime
+# =============================================================================
+FROM node:20-alpine AS runtime
+
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
+
+# Copy built output from builder
+COPY --from=builder --chown=nextjs:nodejs /app/.output ./.output
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+
+USER nextjs
+
+EXPOSE 5173
+
+ENV NODE_ENV=production
+ENV PORT=5173
+ENV HOST=0.0.0.0
+
+CMD ["node", ".output/server/index.mjs"]

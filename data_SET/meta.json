@@ -1,0 +1,77 @@
+{
+  "datasets": {
+    "ds_be7cac4b336a": {
+      "id": "ds_be7cac4b336a",
+      "name": "test_charges.csv",
+      "type": "csv",
+      "rows": 24,
+      "columns": 4,
+      "size_bytes": 1291,
+      "uploaded_at": "2026-07-10T05:54:10.478558+00:00",
+      "status": "ready",
+      "missing_values": 0
+    },
+    "ds_46137c3d329d": {
+      "id": "ds_46137c3d329d",
+      "name": "test_charges.csv",
+      "type": "csv",
+      "rows": 24,
+      "columns": 4,
+      "size_bytes": 1305,
+      "uploaded_at": "2026-07-10T05:54:29.044089+00:00",
+      "status": "ready",
+      "missing_values": 0
+    },
+    "ds_8a9c4ce8dbc3": {
+      "id": "ds_8a9c4ce8dbc3",
+      "name": "test_charges.csv",
+      "type": "csv",
+      "rows": 24,
+      "columns": 4,
+      "size_bytes": 1300,
+      "uploaded_at": "2026-07-10T05:54:53.947960+00:00",
+      "status": "ready",
+      "missing_values": 0
+    }
+  },
+  "reports": {},
+  "history": [
+    {
+      "id": "hist_133d50fb054f",
+      "kind": "conversation",
+      "title": "make a next month charge prediction by using monthlycharge",
+      "created_at": "2026-07-10T05:54:57.553048+00:00",
+      "meta": {
+        "conversation_id": "conv_e05358061d8c"
+      }
+    },
+    {
+      "id": "hist_939ed41f11da",
+      "kind": "conversation",
+      "title": "make a next month charge prediction by using monthlycharge it result wrongly",
+      "created_at": "2026-07-10T05:54:32.330442+00:00",
+      "meta": {
+        "conversation_id": "conv_580ff10bd232"
+      }
+    },
+    {
+      "id": "hist_aca8643e0913",
+      "kind": "conversation",
+      "title": "make a next month charge prediction by using monthlycharge it result wrongly",
+      "created_at": "2026-07-10T05:53:28.111350+00:00",
+      "meta": {
+        "conversation_id": "conv_0521076b5656"
+      }
+    }
+  ],
+  "automation_runs": [],
+  "settings": {
+    "groq_model": "llama-3.3-70b-versatile",
+    "temperature": 0.3,
+    "language": "en",
+    "theme": "dark",
+    "automation_enabled": false,
+    "voice_enabled": true,
+    "notifications_enabled": true
+  }
+}
