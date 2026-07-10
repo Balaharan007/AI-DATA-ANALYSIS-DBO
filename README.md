@@ -5,6 +5,51 @@
 
 ---
 
+## 📊 System Architecture Flow
+
+```mermaid
+flowchart TD
+    A[👤 USER] -->|Ask Question| B[React Frontend (TanStack Start)]
+    A -->|Upload CSV Dataset| B
+    B --> C[JWT Authentication (MongoDB)]
+    C --> D[FastAPI Backend API]
+    D --> E[Dataset Service]
+    D --> F[Chat Service]
+    D --> G[Report Service]
+    E --> H[CSV Validation]
+    H --> I[Pandas CSV Parser]
+    I --> J[Data Cleaning & Validation]
+    J --> K[Quality Score & Metadata]
+    K --> L[Dataset Registry]
+    F --> M[Intent Classification]
+    M --> N[Tool Routing Engine]
+    N --> O[Load Dataset]
+    L --> P[Analysis Engine]
+    O --> P
+    P --> Q[Pandas Analysis]
+    P --> R[DuckDB SQL]
+    P --> S[Dashboard Builder]
+    Q --> T[Anomaly Detection (Isolation Forest)]
+    Q --> U[Forecasting (Prophet)]
+    Q --> V[Chart Generator (Recharts, Plotly)]
+    T --> W[Groq LLM (Explanation Only)]
+    U --> W
+    V --> W
+    W --> X[Response Formatter]
+    X --> Y[Text Response]
+    X --> Z[Charts]
+    X --> AA[SQL Result]
+    X --> AB[Insights]
+    AB --> AC[Report Generator]
+    AC --> AD[PDF]
+    AC --> AE[DOCX]
+    AC --> AF[Google Drive Upload]
+    Y & Z & AA & AB & AD & AE & AF --> AG[Final API Response]
+    AG --> AH[React Dashboard]
+```
+
+---
+
 ## 🚀 Quick Start
 
 ```bash
