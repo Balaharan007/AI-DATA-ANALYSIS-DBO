@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     mongodb_users_collection: str = "users"
 
     # JWT settings
-    jwt_secret_key: str = "your-secret-key-change-in-production-min-32-chars-min-32-chars"
+    jwt_secret_key: str = "your-secret-key-change-in-production-min-32-chars"
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 60 * 24 * 7  # 7 days
 
