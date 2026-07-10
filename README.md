@@ -4,8 +4,6 @@
 > React (Frontend) • FastAPI + Groq LLM (Backend) • MongoDB Auth • File-based Storage
 
 ---
-## System architecture
-
 ## 🏗️ System Architecture
 
 ```text
