@@ -5,8 +5,8 @@ import {
   Download,
   Eye,
   Trash2,
-  Share2,
-  ExternalLink,
+  Send,
+  CheckCircle2,
 } from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -48,11 +48,20 @@ function ReportsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const sendToTelegram = useMutation({
+    mutationFn: (reportId: string) => endpoints.sendReportToTelegram(reportId),
+    onSuccess: () => {
+      toast.success("Report sent to Telegram");
+      qc.invalidateQueries({ queryKey: ["reports"] });
+    },
+    onError: (e: Error) => toast.error(e.message || "Failed to send to Telegram"),
+  });
+
   return (
     <div className="mx-auto max-w-7xl p-6">
       <PageHeader
         title="Reports"
-        description="Generated PDF and HTML reports from your analyses."
+        description="Generated PDF and DOCX reports from your analyses."
       />
       {q.isLoading ? (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -71,7 +80,7 @@ function ReportsPage() {
           {q.data.map((r) => {
             const previewUrl = toFileUrl(r.preview_url);
             const downloadUrl = toFileUrl(r.url);
-            const driveUrl = r.drive_url;
+            const telegramSent = r.telegram_sent;
             return (
               <Card key={r.id}>
                 <CardContent className="flex flex-col gap-3 p-5">
@@ -145,17 +154,27 @@ function ReportsPage() {
                         </a>
                       </Button>
                     )}
-                    {r.drive_url && (
+                    {telegramSent && (
                       <Button
-                        asChild
                         size="sm"
                         variant="outline"
                         className="w-full"
+                        disabled
                       >
-                        <a href={r.drive_url} target="_blank" rel="noreferrer">
-                          <ExternalLink className="mr-1 h-3.5 w-3.5" />
-                          Open in Google Drive
-                        </a>
+                        <CheckCircle2 className="mr-1 h-3.5 w-3.5 text-green-600" />
+                        Sent to Telegram
+                      </Button>
+                    )}
+                    {!telegramSent && r.url && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => sendToTelegram.mutate(r.id)}
+                        disabled={sendToTelegram.isPending}
+                      >
+                        <Send className={`mr-1 h-3.5 w-3.5 ${sendToTelegram.isPending ? "animate-spin" : ""}`} />
+                        {sendToTelegram.isPending ? "Sending..." : "Send to Telegram"}
                       </Button>
                     )}
                     <Button

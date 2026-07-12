@@ -25,7 +25,7 @@ from .. import groq_client
 from ..config import settings
 from ..storage import new_id, now_iso, store
 from . import analysis, dataset_service
-from .google_drive_service import google_drive_service
+from .telegram_service import telegram_service
 
 
 def _insights_text(df, dataset_name: str, prompt: Optional[str]) -> str:
@@ -240,7 +240,7 @@ def _render_chart_image(chart_spec: dict) -> io.BytesIO:
     return buf
 
 
-def generate_report(dataset_id: str, prompt: Optional[str] = None) -> dict:
+def generate_report(dataset_id: str, prompt: Optional[str] = None, user_id: Optional[str] = None) -> dict:
     """Generate a dataset analysis report with Visual Analysis (2 charts: bar + line).
     Produces both PDF (via ReportLab) and DOCX (via python-docx)."""
     df, records = dataset_service.get_context_df(dataset_id)
@@ -344,22 +344,37 @@ def generate_report(dataset_id: str, prompt: Optional[str] = None) -> dict:
         "url": f"/reports-files/{pdf_filename}",
         "docx_url": f"/reports-files/{docx_filename}",
         "preview_url": f"/reports-files/{pdf_filename}",
-        "drive_url": None,
-        "drive_pdf_id": None,
-        "drive_docx_id": None,
+        "telegram_sent": False,
+        "telegram_pdf_message_id": None,
+        "telegram_docx_message_id": None,
     }
 
-    # Upload to Google Drive if enabled (PDF only)
-    if settings.google_drive_enabled:
+    # Upload to Telegram if enabled and user_id provided (both PDF and DOCX)
+    if settings.telegram_bot_token and user_id:
         try:
-            # Read PDF content
+            # Send PDF
             pdf_content = pdf_path.read_bytes()
-            pdf_result = google_drive_service.upload_pdf(pdf_content, pdf_filename)
+            pdf_result = telegram_service.send_document_sync(
+                file_content=pdf_content,
+                filename=pdf_filename,
+                caption=f"📊 Report: {dataset_name} (PDF)"
+            )
             if pdf_result:
-                record["drive_url"] = pdf_result.get("webViewLink")
-                record["drive_pdf_id"] = pdf_result.get("id")
+                record["telegram_sent"] = True
+                record["telegram_pdf_message_id"] = pdf_result.get("message_id")
+
+            # Send DOCX
+            docx_content = docx_path.read_bytes()
+            docx_result = telegram_service.send_document_sync(
+                file_content=docx_content,
+                filename=docx_filename,
+                caption=f"📄 Report: {dataset_name} (DOCX)"
+            )
+            if docx_result:
+                record["telegram_sent"] = True
+                record["telegram_docx_message_id"] = docx_result.get("message_id")
         except Exception as e:
-            print(f"Failed to upload PDF to Google Drive: {e}")
+            print(f"Failed to send to Telegram: {e}")
 
     store.add_report(record)
     store.add_history({

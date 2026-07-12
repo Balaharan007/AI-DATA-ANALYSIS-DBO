@@ -177,7 +177,7 @@ function UploadPage() {
               label="Quality score"
               value={
                 latest.quality_score
-                  ? `${Math.round(latest.quality_score * 100)}%`
+                  ? `${Math.round(latest.quality_score)}%`
                   : "—"
               }
             />

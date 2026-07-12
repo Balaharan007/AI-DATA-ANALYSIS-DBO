@@ -26,7 +26,7 @@ async def generate_chart(payload: GenerateChartRequest):
 
 @router.post("/generate-report")
 async def generate_report(payload: GenerateReportRequest):
-    return report_service.generate_report(payload.dataset_id, payload.prompt)
+    return report_service.generate_report(payload.dataset_id, payload.prompt, payload.user_id)
 
 
 @router.post("/detect-anomaly")

@@ -79,7 +79,7 @@ def _narrate(question: str, context: str, conv_id: str) -> str:
     return groq_client.chat_completion(messages, temperature=0.4, max_tokens=900)
 
 
-def handle_chat(message: str, dataset_id: Optional[str], conversation_id: Optional[str], action: Optional[str]) -> dict:
+def handle_chat(message: str, dataset_id: Optional[str], conversation_id: Optional[str], action: Optional[str], user_id: Optional[str] = None) -> dict:
     conv_id = conversation_id or new_id("conv_")
     df, records = dataset_service.get_context_df(dataset_id)
     steps: list[dict] = [_step("plan", "Understanding request", "completed")]
@@ -207,7 +207,7 @@ def handle_chat(message: str, dataset_id: Optional[str], conversation_id: Option
             from . import report_service
 
             ds_id = dataset_id.split(",")[0] if dataset_id else records[0]["id"]
-            report = report_service.generate_report(ds_id, message)
+            report = report_service.generate_report(ds_id, message, user_id)
             steps[-1]["status"] = "completed"
 
             base_url = "http://localhost:8000"

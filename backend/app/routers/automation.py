@@ -9,7 +9,7 @@ router = APIRouter(tags=["automation"])
 SERVICES = [
     {"id": "gmail", "name": "gmail", "label": "Gmail", "connected": False},
     {"id": "telegram", "name": "telegram", "label": "Telegram", "connected": False},
-    {"id": "google_drive", "name": "google_drive", "label": "Google Drive", "connected": False},
+    {"id": "calendar", "name": "calendar", "label": "Calendar", "connected": False},
 ]
 
 
@@ -29,7 +29,7 @@ async def run_automation(payload: dict = Body(...)):
     if service not in {s["name"] for s in SERVICES}:
         raise HTTPException(400, f"Unknown automation service '{service}'.")
     # NOTE: this is a functional stub. Wire this up to your n8n webhook / Gmail API /
-    # Google Drive API calls here. For example, POST to an n8n webhook URL configured
+    # Google Calendar API calls here. For example, POST to an n8n webhook URL configured
     # per-service via environment variables.
     run = {
         "id": new_id("run_"),

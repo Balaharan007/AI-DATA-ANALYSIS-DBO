@@ -7,7 +7,8 @@ import pandas as pd
 from fastapi import HTTPException, UploadFile
 
 from .. import groq_client
-from ..storage import store
+from ..storage import store, new_id
+from .preprocessing_service import PreprocessingService, validate_dataset, preprocess_dataset
 
 IMAGE_EXTS = {"png", "jpg", "jpeg", "webp", "gif", "bmp"}
 CSV_EXTS = {"csv", "tsv"}
@@ -16,24 +17,6 @@ EXCEL_EXTS = {"xlsx", "xls"}
 
 def _ext(filename: str) -> str:
     return filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
-
-
-def _clean_df(df: pd.DataFrame) -> pd.DataFrame:
-    df.columns = [str(c).strip() for c in df.columns]
-    df = df.dropna(axis=1, how="all").dropna(axis=0, how="all")
-    for col in df.columns:
-        if df[col].dtype == object:
-            # try numeric coercion (handles currency/thousands separators)
-            cleaned = (
-                df[col]
-                .astype(str)
-                .str.replace(r"[,$%]", "", regex=True)
-                .str.strip()
-            )
-            numeric = pd.to_numeric(cleaned, errors="coerce")
-            if numeric.notna().mean() > 0.85 and df[col].notna().any():
-                df[col] = numeric
-    return df.reset_index(drop=True)
 
 
 def _quality_score(df: pd.DataFrame) -> float:
@@ -58,7 +41,11 @@ def _detect_join_keys(df: pd.DataFrame) -> list[str]:
     return keys[:5]
 
 
-async def ingest_file(file: UploadFile) -> dict:
+async def ingest_file(
+    file: UploadFile,
+    auto_clean: bool = True,
+    aggressive_clean: bool = False,
+) -> dict:
     raw = await file.read()
     if not raw:
         raise HTTPException(400, "Uploaded file is empty.")
@@ -105,14 +92,27 @@ async def ingest_file(file: UploadFile) -> dict:
     if df.shape[0] == 0 or df.shape[1] == 0:
         raise HTTPException(422, "No usable rows/columns found in the uploaded file.")
 
-    df = _clean_df(df)
+    # Run preprocessing pipeline
+    from ..models import ColumnMeta
+    ds_id = new_id("ds_")
+    print(f"DEBUG: Using new_id = {ds_id}")
+
+    # Preprocess the dataset
+    cleaned_df, report = preprocess_dataset(df, ds_id, name, auto_clean, aggressive_clean)
+
+    # Calculate quality score
+    quality_score = _quality_score(cleaned_df)
+    missing_values = int(cleaned_df.isna().sum().sum())
+    possible_join_keys = _detect_join_keys(cleaned_df)
+
     extra = {
-        "quality_score": _quality_score(df),
-        "missing_values": int(df.isna().sum().sum()),
-        "possible_join_keys": _detect_join_keys(df),
+        "quality_score": quality_score,
+        "missing_values": missing_values,
+        "possible_join_keys": possible_join_keys,
         "detected_tables": 1,
+        "preprocessing_report": report.__dict__,
     }
-    record = store.add_dataset(df, name=name, dtype=dtype, extra=extra)
+    record = store.add_dataset(cleaned_df, name=name, dtype=dtype, extra=extra)
 
     store.add_history(
         {
@@ -127,8 +127,6 @@ async def ingest_file(file: UploadFile) -> dict:
 
 
 def store_new_id() -> str:
-    from ..storage import new_id
-
     return new_id("hist_")
 
 

@@ -26,6 +26,7 @@ import { endpoints } from "@/lib/api/endpoints";
 import type { ChatMessage as Msg, ChatRequest, Dataset } from "@/lib/api/types";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 export const Route = createFileRoute("/chat")({
   component: ChatPage,
@@ -69,6 +70,8 @@ function ChatPage() {
   const [history, setHistory] = useState<
     Array<{ id: string; title: string; created_at: string }>
   >([]);
+
+  const { user } = useAuth();
 
   const { data: datasets = [] } = useQuery<Dataset[]>({
     queryKey: ["datasets"],
@@ -176,6 +179,7 @@ function ChatPage() {
       action,
       conversation_id: conversationId,
       dataset_id: overrideDatasetId ?? selectedDatasetId,
+      user_id: user?.id,
     });
   };
 

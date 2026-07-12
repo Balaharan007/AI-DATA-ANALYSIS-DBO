@@ -103,7 +103,7 @@ function DatasetsIndex() {
                     label="Quality"
                     value={
                       d.quality_score
-                        ? `${Math.round(d.quality_score * 100)}%`
+                        ? `${Math.round(d.quality_score)}%`
                         : "—"
                     }
                   />

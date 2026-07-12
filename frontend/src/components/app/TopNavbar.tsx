@@ -1,6 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
-  Bell,
   Upload,
   Search,
   Database,
@@ -59,9 +58,6 @@ export function TopNavbar() {
           <Link to="/datasets/upload">
             <Upload className="h-4 w-4" /> Upload
           </Link>
-        </Button>
-        <Button variant="ghost" size="icon" aria-label="Notifications">
-          <Bell className="h-4 w-4" />
         </Button>
 
         {isLoading ? (

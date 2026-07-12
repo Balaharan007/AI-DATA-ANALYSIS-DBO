@@ -177,9 +177,9 @@ function RootComponent() {
 }
 
 function AuthGate() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
-  // Show loading state while checking auth
+  // Show loading state while checking auth (client-side only)
   if (isLoading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background">

@@ -151,6 +151,9 @@ class Store:
             self._data["reports"].pop(report_id, None)
             self._save()
 
+    def get_report(self, report_id: str) -> Optional[dict]:
+        return self._data["reports"].get(report_id)
+
     # ---------- history ----------
     def add_history(self, record: dict) -> None:
         with _lock:
@@ -181,6 +184,41 @@ class Store:
             self._data["settings"].update({k: v for k, v in patch.items() if v is not None})
             self._save()
             return self._data["settings"]
+
+    # ---------- Google OAuth tokens ----------
+    def get_google_tokens(self, user_id: str) -> Optional[dict]:
+        """Get Google OAuth tokens for a user."""
+        return self._data.get("google_tokens", {}).get(user_id)
+
+    def save_google_tokens(self, user_id: str, tokens: dict) -> None:
+        """Save Google OAuth tokens for a user."""
+        with _lock:
+            if "google_tokens" not in self._data:
+                self._data["google_tokens"] = {}
+            self._data["google_tokens"][user_id] = {
+                **tokens,
+                "updated_at": now_iso()
+            }
+            self._save()
+
+    def update_google_tokens(self, user_id: str, tokens: dict) -> None:
+        """Update Google OAuth tokens for a user (merge with existing)."""
+        with _lock:
+            if "google_tokens" not in self._data:
+                self._data["google_tokens"] = {}
+            existing = self._data["google_tokens"].get(user_id, {})
+            self._data["google_tokens"][user_id] = {
+                **existing,
+                **tokens,
+                "updated_at": now_iso()
+            }
+            self._save()
+
+    def delete_google_tokens(self, user_id: str) -> None:
+        """Delete Google OAuth tokens for a user."""
+        with _lock:
+            self._data.get("google_tokens", {}).pop(user_id, None)
+            self._save()
 
 
 store = Store()

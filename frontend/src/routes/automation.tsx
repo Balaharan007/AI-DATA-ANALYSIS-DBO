@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Mail, Send, HardDrive, Play, Zap } from "lucide-react";
+import { Mail, Send, Play, Zap, Calendar } from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/automation")({
 const iconFor: Record<string, React.ComponentType<{ className?: string }>> = {
   gmail: Mail,
   telegram: Send,
-  google_drive: HardDrive,
+  calendar: Calendar,
 };
 
 function AutomationPage() {

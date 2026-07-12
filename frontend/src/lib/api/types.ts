@@ -121,6 +121,7 @@ export interface ChatRequest {
     | "pandas"
     | "report"
     | null;
+  user_id?: string;
 }
 
 export interface ChatResponse {
@@ -137,7 +138,9 @@ export interface Report {
   url?: string;
   preview_url?: string;
   docx_url?: string;
-  drive_url?: string;
+  telegram_sent?: boolean;
+  telegram_pdf_message_id?: number;
+  telegram_docx_message_id?: number;
 }
 
 export interface HistoryItem {
@@ -150,7 +153,7 @@ export interface HistoryItem {
 
 export interface AutomationService {
   id: string;
-  name: "gmail" | "telegram" | "google_drive" | string;
+  name: "gmail" | "telegram" | "calendar" | string;
   label: string;
   connected: boolean;
   last_run?: string;

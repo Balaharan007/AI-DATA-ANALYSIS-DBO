@@ -56,7 +56,7 @@
       ├──────────────┬────┴────────────┐
       ▼              ▼                 ▼
  Anomaly        Forecasting      Chart Generator
- Detection        (Prophet)        (Recharts)
+ Detection        (Prophet)        (Recharts,Plotly)
 (Isolation Forest)
       │
       ▼
@@ -74,7 +74,7 @@ Text Charts      SQL Result      Insights
       │
  ┌────┼──────────────┐
  ▼    ▼              ▼
-PDF  DOCX   Google Drive Upload
+PDF  DOCX   Telegram Bot Upload
       │
       ▼
  Final API Response
@@ -151,7 +151,7 @@ flowchart TB
     Frontend -->|REST API :8000| Backend
     Backend -->|Auth + Settings| Mongo
     Backend -->|LLM/Vision/Whisper| Groq[Groq Cloud API]
-    Backend -.->|Optional Backup| Drive[Google Drive]
+    Backend -.->|Optional Reports| Telegram[Telegram Bot]
     
     %% Build Process
     subgraph Build [🔨 Multi-stage Build]
@@ -174,7 +174,7 @@ flowchart TB
     class Frontend frontend;
     class Backend backend;
     class Mongo db;
-    class Groq,Drive ext;
+    class Groq,Telegram ext;
     class B1,B2,B3,B4 build;
 ```
 
@@ -187,7 +187,8 @@ GROQ_API_KEY=your_groq_api_key_here
 MONGODB_URL=mongodb://mongodb:27017
 JWT_SECRET_KEY=your-super-secret-key-min-32-chars-long
 CORS_ORIGINS=http://localhost:5173,http://localhost:3000
-GOOGLE_DRIVE_ENABLED=false
+TELEGRAM_BOT_TOKEN=8974667061:AAH49-3urvoK8OkodO9le-vHBZkMueI69vQ
+TELEGRAM_CHAT_ID=6798365742
 EOF
 
 # 2. Build and start all services
@@ -227,15 +228,14 @@ MONGODB_URL=mongodb://mongodb:27017
 JWT_SECRET_KEY=your-32-char-minimum-secret-key
 CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 
-# Optional
-GOOGLE_DRIVE_ENABLED=false
-GOOGLE_DRIVE_CREDENTIALS_PATH=/app/credentials.json
-GOOGLE_DRIVE_FOLDER_ID=your_folder_id
+# Telegram Bot (for report delivery)
+TELEGRAM_BOT_TOKEN=8974667061:AAH49-3urvoK8OkodO9le-vHBZkMueI69vQ
+TELEGRAM_CHAT_ID=6798365742
 ```
 
 ### Production Tips
 
-1. **Use secrets** - Store `GROQ_API_KEY` and `JWT_SECRET_KEY` in Docker secrets or `.env` (not in image)
+1. **Use secrets** - Store `GROQ_API_KEY`, `JWT_SECRET_KEY`, `TELEGRAM_BOT_TOKEN` in Docker secrets or `.env` (not in image)
 2. **Reverse proxy** - Put nginx/Traefik in front for SSL termination
 3. **Volumes** - `backend_data` and `mongodb_data` persist across restarts
 4. **Scaling** - Backend can run multiple workers: `--workers 4` in uvicorn CMD
@@ -251,9 +251,8 @@ GOOGLE_DRIVE_FOLDER_ID=your_folder_id
 | `MONGODB_URL` | MongoDB connection string | ✅ Yes |
 | `JWT_SECRET_KEY` | HS256 signing key (min 32 chars) | ✅ Yes |
 | `CORS_ORIGINS` | Comma-separated frontend origins | ✅ Yes |
-| `GOOGLE_DRIVE_ENABLED` | `true`/`false` — enable Drive backup | ❌ Optional |
-| `GOOGLE_DRIVE_CREDENTIALS_PATH` | Service account JSON path | ❌ Optional |
-| `GOOGLE_DRIVE_FOLDER_ID` | Target folder ID for uploads | ❌ Optional |
+| `TELEGRAM_BOT_TOKEN` | Bot token from @BotFather | ✅ Yes |
+| `TELEGRAM_CHAT_ID` | Chat/group/channel ID to send files to | ✅ Yes |
 
 ---
 

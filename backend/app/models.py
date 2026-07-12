@@ -109,6 +109,7 @@ class ChatRequest(BaseModel):
     dataset_id: Optional[str] = None
     conversation_id: Optional[str] = None
     action: Optional[str] = None
+    user_id: Optional[str] = None
 
 
 class ChatResponse(BaseModel):
@@ -124,6 +125,10 @@ class Report(BaseModel):
     dataset_name: Optional[str] = None
     url: Optional[str] = None
     preview_url: Optional[str] = None
+    docx_url: Optional[str] = None
+    telegram_sent: Optional[bool] = False
+    telegram_pdf_message_id: Optional[int] = None
+    telegram_docx_message_id: Optional[int] = None
 
 
 class HistoryItem(BaseModel):
@@ -169,6 +174,7 @@ class GenerateChartRequest(BaseModel):
 class GenerateReportRequest(BaseModel):
     dataset_id: str
     prompt: Optional[str] = None
+    user_id: Optional[str] = None
 
 
 class DetectAnomalyRequest(BaseModel):

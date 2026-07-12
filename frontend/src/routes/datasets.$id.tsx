@@ -95,7 +95,7 @@ function DatasetDetailPage() {
             label="Quality"
             value={
               meta.data.quality_score
-                ? `${Math.round(meta.data.quality_score * 100)}%`
+                ? `${Math.round(meta.data.quality_score)}%`
                 : "—"
             }
           />

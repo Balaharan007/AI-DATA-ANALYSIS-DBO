@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/app/PageHeader";
@@ -19,6 +19,8 @@ import { endpoints } from "@/lib/api/endpoints";
 import type { AppSettings } from "@/lib/api/types";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/use-theme";
+import { useAuth } from "@/context/AuthContext";
+import { Loader2, Send, Bot } from "lucide-react";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
@@ -166,12 +168,146 @@ function SettingsPage() {
           </CardContent>
         </Card>
 
+        {/* Telegram Bot Integration */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Bot className="h-4 w-4" />
+              Telegram Bot Integration
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <TelegramSettings />
+          </CardContent>
+        </Card>
+
         <div className="flex justify-end">
           <Button onClick={() => save.mutate(form)} disabled={save.isPending}>
             {save.isPending ? "Saving…" : "Save changes"}
           </Button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function TelegramSettings() {
+  const { user } = useAuth();
+  const [telegramConfigured, setTelegramConfigured] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      checkTelegramConfig();
+    }
+  }, [user]);
+
+  const checkTelegramConfig = async () => {
+    try {
+      // Test connection by sending a test message
+      const result = await endpoints.testTelegramConnection();
+      setTelegramConfigured(result.success);
+      setTestResult(result);
+    } catch (e) {
+      console.error("Failed to check Telegram config:", e);
+      setTelegramConfigured(false);
+    }
+  };
+
+  const handleTestConnection = async () => {
+    if (!user) return;
+    setIsTesting(true);
+    setTestResult(null);
+    try {
+      const result = await endpoints.testTelegramConnection();
+      setTelegramConfigured(result.success);
+      setTestResult(result);
+      if (result.success) {
+        toast.success("Test message sent to Telegram!");
+      } else {
+        toast.error(result.message || "Failed to send test message");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to test Telegram connection");
+      setTestResult({ success: false, message: e.message });
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="text-center py-4 text-muted-foreground">
+        Please sign in to configure Telegram.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <Label>Telegram Bot</Label>
+          <p className="text-xs text-muted-foreground">
+            Send generated reports (PDF & DOCX) automatically to a Telegram chat/group.
+          </p>
+        </div>
+        {telegramConfigured ? (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-green-600 flex items-center gap-1">
+              <Bot className="h-3.5 w-3.5" />
+              Connected
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleTestConnection}
+              disabled={isTesting}
+            >
+              {isTesting ? (
+                <>
+                  <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                  Testing...
+                </>
+              ) : (
+                <>
+                  <Send className="mr-1 h-3.5 w-3.5" />
+                  Test Connection
+                </>
+              )}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-amber-600">
+            <span className="text-sm">Not configured</span>
+            <span className="text-xs">(requires backend config)</span>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2 text-xs text-muted-foreground">
+        <p>
+          <strong>Bot Token:</strong> Configured in backend .env (TELEGRAM_BOT_TOKEN)
+        </p>
+        <p>
+          <strong>Chat ID:</strong> Configured in backend .env (TELEGRAM_CHAT_ID)
+        </p>
+        <p>
+          To get your Chat ID: Message your bot, then visit{' '}
+          <code>{"https://api.telegram.org/bot<TOKEN>/getUpdates"}</code>
+        </p>
+      </div>
+
+      {testResult && (
+        <div
+          className={`p-3 rounded text-xs ${
+            testResult.success ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"
+          }`}
+        >
+          {testResult.message}
+        </div>
+      )}
     </div>
   );
 }

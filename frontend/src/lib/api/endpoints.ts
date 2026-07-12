@@ -100,6 +100,7 @@ export const endpoints = {
   async generateReport(payload: {
     dataset_id: string;
     prompt?: string;
+    user_id?: string;
   }): Promise<Report> {
     const { data } = await api.post<Report>("/generate-report", payload);
     return data;
@@ -147,6 +148,14 @@ export const endpoints = {
   },
   async deleteReport(id: string): Promise<void> {
     await api.delete(`/reports/${id}`);
+  },
+  async sendReportToTelegram(reportId: string): Promise<{ success: boolean; message: string; files: any }> {
+    const { data } = await api.post(`/reports/${reportId}/send-telegram`);
+    return data;
+  },
+  async testTelegramConnection(): Promise<{ success: boolean; message: string }> {
+    const { data } = await api.post("/telegram/test");
+    return data;
   },
 
   // History

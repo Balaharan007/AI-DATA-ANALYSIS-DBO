@@ -36,10 +36,9 @@ services:
       - JWT_ACCESS_TOKEN_EXPIRE_MINUTES=10080
       - CORS_ORIGINS=http://localhost:5173,http://localhost:3000,http://localhost:8080,http://frontend:5173
 
-      # Optional - Google Drive
-      - GOOGLE_DRIVE_ENABLED=${GOOGLE_DRIVE_ENABLED:-false}
-      - GOOGLE_DRIVE_CREDENTIALS_PATH=${GOOGLE_DRIVE_CREDENTIALS_PATH}
-      - GOOGLE_DRIVE_FOLDER_ID=${GOOGLE_DRIVE_FOLDER_ID}
+      # Telegram Bot settings
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
 
       # Runtime
       - PORT=8000

@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     groq_api_key: str = "your-groq-api-key-here"
     groq_text_model: str = "llama-3.3-70b-versatile"
     groq_fallback_text_model: str = "kimi-k2-instruct"
-    groq_vision_model: str = "llama-3.3-70b-versatile"
+    groq_vision_model: str = "meta-llama/llama-4-scout-17b-16e-instruct"
     groq_whisper_model: str = "whisper-large-v3-turbo"
 
     cors_origins: str = "http://localhost:3000,http://localhost:5173,http://localhost:8080"
@@ -37,10 +37,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 60 * 24 * 7  # 7 days
 
-    # Google Drive settings
-    google_drive_enabled: bool = False
-    google_drive_credentials_path: str = ""
-    google_drive_folder_id: str = ""
+    # Telegram Bot settings
+    telegram_bot_token: str = "8974667061:AAH49-3urvoK8OkodO9le-vHBZkMueI69vQ"
+    telegram_chat_id: str = "6798365742"
 
     @property
     def cors_origin_list(self) -> list[str]:
@@ -60,7 +59,8 @@ class Settings(BaseSettings):
 
     @property
     def meta_path(self) -> Path:
-        return Path(self.data_dir) / "meta.json"
+        p = Path(self.data_dir) / "meta.json"
+        return p
 
 
 settings = Settings()
