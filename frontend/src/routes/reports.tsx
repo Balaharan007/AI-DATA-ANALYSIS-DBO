@@ -7,6 +7,7 @@ import {
   Trash2,
   Send,
   CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,8 +51,8 @@ function ReportsPage() {
 
   const sendToTelegram = useMutation({
     mutationFn: (reportId: string) => endpoints.sendReportToTelegram(reportId),
-    onSuccess: () => {
-      toast.success("Report sent to Telegram");
+    onSuccess: (data, reportId) => {
+      toast.success("Report sent to Telegram successfully!");
       qc.invalidateQueries({ queryKey: ["reports"] });
     },
     onError: (e: Error) => toast.error(e.message || "Failed to send to Telegram"),
@@ -81,6 +82,8 @@ function ReportsPage() {
             const previewUrl = toFileUrl(r.preview_url);
             const downloadUrl = toFileUrl(r.url);
             const telegramSent = r.telegram_sent;
+            const isSending = sendToTelegram.isPending && sendToTelegram.variables === r.id;
+
             return (
               <Card key={r.id}>
                 <CardContent className="flex flex-col gap-3 p-5">
@@ -154,15 +157,16 @@ function ReportsPage() {
                         </a>
                       </Button>
                     )}
-                    {telegramSent && (
+                    {telegramSent && !isSending && (
                       <Button
                         size="sm"
                         variant="outline"
                         className="w-full"
-                        disabled
+                        onClick={() => sendToTelegram.mutate(r.id)}
                       >
                         <CheckCircle2 className="mr-1 h-3.5 w-3.5 text-green-600" />
-                        Sent to Telegram
+                        <span>Sent to Telegram</span>
+                        <Send className="ml-1 h-3.5 w-3.5" />
                       </Button>
                     )}
                     {!telegramSent && r.url && (
@@ -171,11 +175,17 @@ function ReportsPage() {
                         variant="outline"
                         className="w-full"
                         onClick={() => sendToTelegram.mutate(r.id)}
-                        disabled={sendToTelegram.isPending}
+                        disabled={sendToTelegram.isPending && sendToTelegram.variables === r.id}
                       >
-                        <Send className={`mr-1 h-3.5 w-3.5 ${sendToTelegram.isPending ? "animate-spin" : ""}`} />
-                        {sendToTelegram.isPending ? "Sending..." : "Send to Telegram"}
+                        <Send className={`mr-1 h-3.5 w-3.5 ${sendToTelegram.isPending && sendToTelegram.variables === r.id ? "animate-spin" : ""}`} />
+                        {sendToTelegram.isPending && sendToTelegram.variables === r.id ? "Sending..." : "Send to Telegram"}
                       </Button>
+                    )}
+                    {isSending && (
+                      <div className="flex items-center justify-center text-sm text-muted-foreground">
+                        <AlertCircle className="mr-1 h-3.5 w-3.5 animate-spin text-blue-500" />
+                        Sending to Telegram...
+                      </div>
                     )}
                     <Button
                       size="icon"

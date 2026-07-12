@@ -27,11 +27,11 @@ frontend/
 │   │   ├── datasets.tsx   # Dataset list / management
 │   │   ├── datasets.upload.tsx   # Upload page
 │   │   ├── datasets.$id.tsx      # Dataset detail / preview
-│   │   ├── dashboard.tsx  # Auto-generated dashboard
+│   │   ├── dashboard.tsx  # Auto-generated BI dashboard
 │   │   ├── reports.tsx    # Report list / generation
 │   │   ├── history.tsx    # Chat history
 │   │   ├── settings.tsx   # Settings page
-│   │   ├── automation.tsx # Automation / workflows
+│   │   ├── automation.tsx # Automation / workflow runner
 │   │   └── __root.tsx     # Root layout (providers, sidebar, navbar, auth gate)
 │   ├── routeTree.gen.ts   # Auto-generated route tree
 │   ├── router.tsx         # Router instance & query client provider
@@ -62,17 +62,17 @@ frontend/
 | `reports` | `/reports` | List & generate PDF reports |
 | `history` | `/history` | Chat / analysis history |
 | `settings` | `/settings` | App settings (API keys, theme, etc.) |
-| `automation` | `/automation` | Automation / workflow runner (n8n, etc.) |
+| `automation` | `/automation` | Automation / workflow runner |
 
 ### Navigation Components
 - **AppSidebar** (`src/components/app/AppSidebar.tsx`) — collapsible left nav with icons + labels
 - **TopNavbar** (`src/components/app/TopNavbar.tsx`) — top bar with theme toggle, user menu, notifications
-- **PageHeader** (`src/components/app/PageHeader.tsx`) — consistent page title + action buttons
+- **PageHeader** (`src/components/app/PageHeader.tsx`) — consistent page title + description + action slot
 
 ### Authentication Flow
 - **AuthProvider** (`src/context/AuthContext.tsx`) — React context managing user session, JWT tokens, login/signup/logout
 - **AuthGate** (in `__root.tsx`) — Conditional rendering: loading → full-page auth screen → authenticated app
-- **AuthModal** (`src/components/auth/AuthModal.tsx`) — Full-page Sign In / Sign Up form with tabs, validation, and error handling
+- **AuthModal** (`src/components/auth/AuthModal.tsx`) — Full-page Sign In / Sign Up form with tabs, validation, error handling
 - **AuthPage** (`src/components/auth/AuthPage.tsx`) — Wrapper for the full-page auth experience
 - **Flow**: On app load → check token in localStorage → if valid, fetch `/auth/me` → show app; if invalid/missing → show full-page auth screen → on success, navigate to `/`
 
@@ -187,15 +187,24 @@ const queryClient = new QueryClient({
 - Dataset defaults (default join strategy, preview rows)
 
 ### 5.9 Automation (`/automation`)
-- List connected services (n8n, Gmail, Drive, etc.)
+- List connected services (Google Drive/Gmail, Telegram, Google Calendar)
+- **All three services show as "Connected" with green status pills**
+- Google Drive shows **Drive icon (Cloud)** and label "Google Drive"
+- Telegram shows **Send icon**
+- Calendar shows **Calendar icon**
 - Trigger workflow runs
 - View run history / logs
+- Test/Run buttons enabled for connected services
+- Status messages:
+  - "Google Drive is connected and ready"
+  - "Telegram bot is connected and ready"
+  - "Google Calendar is connected and ready"
 
 ---
 
 ## 6. API Contract (Frontend ↔ Backend)
 
-Defined in `src/lib/api/types.ts` — mirrors `backend/app/models.py`.
+Defined in `src/lib/api/types.ts` — mirrors `backend/app/models/models.py`.
 
 ### Core Types
 ```ts

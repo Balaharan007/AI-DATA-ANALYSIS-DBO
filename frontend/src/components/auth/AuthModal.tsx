@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 export function AuthModal({
@@ -35,7 +34,6 @@ export function AuthModal({
   onClose: () => void;
 }) {
   const { login, signup } = useAuth();
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -62,8 +60,11 @@ export function AuthModal({
     setIsLoading(true);
     try {
       await login(signinEmail, signinPassword);
-      // Auth context will update and root component will re-render
-      navigate({ to: "/" });
+      // Auth context will update and AuthGate will automatically show the app
+      // No need to navigate - AuthGate handles this
+      if (onClose) {
+        onClose();
+      }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Sign in failed";
       toast.error(message);
@@ -103,7 +104,10 @@ export function AuthModal({
     setIsLoading(true);
     try {
       await signup(signupName, signupEmail, signupPassword);
-      navigate({ to: "/" });
+      // Auth context will update and AuthGate will automatically show the app
+      if (onClose) {
+        onClose();
+      }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Signup failed";
       toast.error(message);

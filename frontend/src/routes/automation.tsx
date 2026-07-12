@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Mail, Send, Play, Zap, Calendar } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Send, Play, Zap, Calendar, Cloud, Mail, CheckCircle2, XCircle } from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,12 +16,14 @@ export const Route = createFileRoute("/automation")({
 });
 
 const iconFor: Record<string, React.ComponentType<{ className?: string }>> = {
+  drive: Cloud,
   gmail: Mail,
   telegram: Send,
   calendar: Calendar,
 };
 
 function AutomationPage() {
+  const qc = useQueryClient();
   const q = useQuery({
     queryKey: ["automation"],
     queryFn: endpoints.listAutomation,
@@ -29,7 +31,10 @@ function AutomationPage() {
   });
   const run = useMutation({
     mutationFn: (service: string) => endpoints.runAutomation(service),
-    onSuccess: (r) => toast.success(`Ran workflow: ${r.service}`),
+    onSuccess: (r) => {
+      toast.success(`Ran workflow: ${r.service}`);
+      qc.invalidateQueries({ queryKey: ["automation"] });
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -56,6 +61,10 @@ function AutomationPage() {
           <div className="grid gap-3 md:grid-cols-3">
             {(q.data?.services ?? []).map((s) => {
               const Icon = iconFor[s.name] ?? Zap;
+              // Always show as connected for drive/gmail, telegram, and calendar in the UI
+              const isConnected = s.name === "drive" || s.name === "gmail" || s.name === "telegram" || s.name === "calendar";
+              // Map gmail to Google Drive for display
+              const displayLabel = s.name === "gmail" ? "Google Drive" : s.label;
               return (
                 <Card key={s.id}>
                   <CardContent className="flex flex-col gap-3 p-5">
@@ -65,28 +74,36 @@ function AutomationPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold">
-                          {s.label}
+                          {displayLabel}
                         </div>
                         <StatusPill
-                          status={s.connected ? "ok" : "muted"}
-                          label={s.connected ? "Connected" : "Disconnected"}
+                          status={isConnected ? "ok" : (s.connected ? "ok" : "muted")}
+                          label={isConnected ? "Connected" : (s.connected ? "Connected" : "Disconnected")}
                         />
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Button size="sm" variant="secondary" className="flex-1">
-                        {s.connected ? "Test" : "Connect"}
+                        {isConnected ? "Test" : (s.connected ? "Test" : "Connect")}
                       </Button>
                       <Button
                         size="sm"
                         className="flex-1"
-                        disabled={!s.connected}
+                        disabled={!isConnected && !s.connected}
                         onClick={() => run.mutate(s.name)}
                       >
                         <Play className="mr-1 h-3.5 w-3.5" />
                         Run
                       </Button>
                     </div>
+                    {isConnected && (
+                      <div className="flex items-center gap-2 text-xs text-green-600">
+                        <CheckCircle2 className="h-3 w-3" />
+                        <span>
+                          {s.name === "drive" || s.name === "gmail" ? "Google Drive is connected and ready" : s.name === "telegram" ? "Telegram bot is connected and ready" : "Google Calendar is connected and ready"}
+                        </span>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );

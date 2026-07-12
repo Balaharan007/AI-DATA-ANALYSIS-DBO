@@ -3,7 +3,27 @@
 > **Full-stack AI platform for conversational data analysis, automated dashboards, and report generation.**  
 > React (Frontend) • FastAPI + Groq LLM (Backend) • MongoDB Auth • File-based Storage
 
+🔗 **Demo Drive Link:** [Google Drive Demo Folder](https://drive.google.com/drive/folders/1JDSeInUWhSbxwf4EhUVDvm-zY6g2ouhK?usp=drive_link)
+
 ---
+
+## 🛠️ Tech Stack
+
+| Layer | Technologies |
+|---|---|
+| **Frontend** | React, Recharts, Plotly |
+| **Backend** | FastAPI, Python, Uvicorn |
+| **AI / LLM** | Groq LLM |
+| **Data Analysis** | Pandas, DuckDB |
+| **Machine Learning** | Scikit-learn, Prophet |
+| **Database** | MongoDB |
+| **Authentication** | JWT (JSON Web Tokens) |
+| **Report Generation** | PDF, DOCX |
+| **Integration** | Telegram Bot • Google Drive • Gmail • Google Calendar |
+| **Deployment** | Docker, Docker Compose |
+
+---
+
 ## 🏗️ System Architecture
 
 ```text
@@ -39,7 +59,7 @@
      Data Cleaning & Validation   │
              │                    │
              ▼                    │
- Quality Score & Metadata          │
+ Quality Score & Metadata         │
              │                    │
              ▼                    ▼
       Dataset Registry      Load Dataset
@@ -74,7 +94,7 @@ Text Charts      SQL Result      Insights
       │
  ┌────┼──────────────┐
  ▼    ▼              ▼
-PDF  DOCX   Telegram Bot Upload
+PDF  DOCX   Telegram Bot Upload -> (Drive,Calender)
       │
       ▼
  Final API Response
@@ -85,7 +105,7 @@ PDF  DOCX   Telegram Bot Upload
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Local Deployment
 
 ```bash
 # 1. Backend
@@ -126,10 +146,6 @@ MONGODB_URL=mongodb://mongodb:27017
 JWT_SECRET_KEY=your_32_char_min_secret
 CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 ```
-
----
-
-## 🐳 Docker Deployment
 
 ```mermaid
 flowchart TB
@@ -229,17 +245,9 @@ JWT_SECRET_KEY=your-32-char-minimum-secret-key
 CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 
 # Telegram Bot (for report delivery)
-TELEGRAM_BOT_TOKEN=8974667061:AAH49-3urvoK8OkodO9le-vHBZkMueI69vQ
+TELEGRAM_BOT_TOKEN=8974667061:AAH49-xxxxxxxxxxxxxxx-xxxxxxxxxxxxx
 TELEGRAM_CHAT_ID=6798365742
 ```
-
-### Production Tips
-
-1. **Use secrets** - Store `GROQ_API_KEY`, `JWT_SECRET_KEY`, `TELEGRAM_BOT_TOKEN` in Docker secrets or `.env` (not in image)
-2. **Reverse proxy** - Put nginx/Traefik in front for SSL termination
-3. **Volumes** - `backend_data` and `mongodb_data` persist across restarts
-4. **Scaling** - Backend can run multiple workers: `--workers 4` in uvicorn CMD
-5. **Health checks** - All services have health checks for orchestration
 
 ---
 

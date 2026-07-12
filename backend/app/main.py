@@ -7,12 +7,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from .config import settings
-from .database import init_indexes
-from .routers import (
-    analysis_router, auth, automation, chat, dashboard, datasets,
-    history, reports, settings_router,
-)
+from .core.config import settings
+from .core.database import init_indexes
+from .domains.auth.routers import router as auth_router
+from .domains.datasets.routers import router as datasets_router
+from .domains.chat.routers import router as chat_router
+from .domains.analysis.routers import router as analysis_router
+from .domains.automation.routers import router as automation_router
+from .domains.reports.routers import router as reports_router
+from .domains.history.routers import router as history_router
+from .domains.dashboard.router import router as dashboard_router
+from .domains.settings.routers import router as settings_router
 
 
 @asynccontextmanager
@@ -37,15 +42,15 @@ app.add_middleware(
 # Serve generated reports / assets
 app.mount("/files", StaticFiles(directory=settings.data_dir), name="files")
 
-app.include_router(datasets.router)
-app.include_router(auth.router)
-app.include_router(chat.router)
-app.include_router(analysis_router.router)
-app.include_router(automation.router)
-app.include_router(reports.router)
-app.include_router(history.router)
-app.include_router(dashboard.router)
-app.include_router(settings_router.router)
+app.include_router(datasets_router)
+app.include_router(auth_router)
+app.include_router(chat_router)
+app.include_router(analysis_router)
+app.include_router(automation_router)
+app.include_router(reports_router)
+app.include_router(history_router)
+app.include_router(dashboard_router)
+app.include_router(settings_router)
 
 
 @app.exception_handler(Exception)

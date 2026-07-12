@@ -10,48 +10,81 @@
 backend/
 ├── app/
 │   ├── __init__.py
-│   ├── main.py              # FastAPI app, CORS, routers, static files, health
-│   ├── config.py            # Pydantic Settings (.env)
-│   ├── models.py            # Pydantic models (mirror frontend types.ts)
-│   ├── storage.py           # JSON + CSV file-based persistence
-│   ├── database.py          # MongoDB connection + indexes
-│   ├── groq_client.py       # Groq SDK wrapper (chat, vision, whisper + 3-model fallback)
-│   ├── routers/             # One file per API resource
+│   ├── main.py                 # FastAPI app, CORS, routers, static files, health
+│   ├── core/                   # Core configuration & database
 │   │   ├── __init__.py
-│   │   ├── auth.py          # POST /auth/signup, /auth/signin, /auth/me, /auth/signout
-│   │   ├── datasets.py      # POST /upload, GET /datasets, GET /datasets/{id}, /preview, DELETE
-│   │   ├── chat.py          # POST /chat, POST /voice
-│   │   ├── analysis_router.py # /generate-chart, /detect-anomaly, /forecast, /generate-sql, /generate-report
-│   │   ├── dashboard.py     # GET /dashboard
-│   │   ├── reports.py       # GET /reports, DELETE /reports/{id}
-│   │   ├── history.py       # GET /history
-│   │   ├── settings_router.py # GET/PUT /settings
-│   │   └── automation.py    # GET/POST /automation (stub)
-│   └── services/            # Business logic
+│   │   ├── config.py           # Pydantic Settings (.env)
+│   │   └── database.py         # MongoDB connection + indexes
+│   ├── models/                 # Pydantic models (shared with frontend types.ts)
+│   │   ├── __init__.py
+│   │   └── models.py
+│   ├── storage/                # File-based persistence (swappable)
+│   │   ├── __init__.py
+│   │   └── storage.py          # Store class: datasets, reports, history, runs, settings, Google tokens
+│   ├── domains/                # Domain-driven modules (feature folders)
+│   │   ├── __init__.py
+│   │   ├── analysis/           # Charts, anomalies, forecasting, SQL, pandas, dashboards
+│   │   │   ├── __init__.py
+│   │   │   ├── analysis.py     # Core analysis logic
+│   │   │   └── routers.py      # /generate-chart, /detect-anomaly, /forecast, /generate-sql, /generate-pandas, /generate-report
+│   │   ├── anomalies/          # Dedicated anomaly detection (if separate)
+│   │   │   ├── __init__.py
+│   │   │   └── service.py
+│   │   ├── auth/               # JWT authentication (HS256, bcrypt)
+│   │   │   ├── __init__.py
+│   │   │   ├── service.py      # AuthService: register, login, tokens, users
+│   │   │   └── routers.py      # /auth/signup, /auth/signin, /auth/me, /auth/signout
+│   │   ├── automation/         # Workflow integrations (Gmail, Telegram, Calendar)
+│   │   │   ├── __init__.py
+│   │   │   ├── automation.py   # Service definitions + stubs
+│   │   │   └── routers.py      # GET/POST /automation (checks Telegram connection)
+│   │   ├── chat/               # Conversational agent (intent routing, narrator)
+│   │   │   ├── __init__.py
+│   │   │   ├── service.py      # ChatService: handle_chat, process_voice
+│   │   │   └── routers.py      # POST /chat, POST /voice
+│   │   ├── dashboard/          # Auto-generated BI dashboards
+│   │   │   ├── __init__.py
+│   │   │   └── router.py       # GET /dashboard
+│   │   ├── datasets/           # File upload, validation, cleaning, preview
+│   │   │   ├── __init__.py
+│   │   │   ├── service.py      # DatasetService: ingest, preview, resolve IDs, context DF
+│   │   │   └── routers.py      # POST /upload, GET /datasets, /datasets/{id}, /preview, DELETE
+│   │   ├── forecasting/        # Advanced forecasting pipeline (Prophet + fallback)
+│   │   │   ├── __init__.py
+│   │   │   └── service.py
+│   │   ├── history/            # Unified activity timeline
+│   │   │   ├── __init__.py
+│   │   │   └── routers.py      # GET /history
+│   │   ├── reports/            # PDF/DOCX generation, Telegram send
+│   │   │   ├── __init__.py
+│   │   │   ├── service.py      # ReportService: generate_report, _render_chart_image
+│   │   │   └── routers.py      # GET /reports, DELETE /reports/{id}, POST /reports/{id}/send-telegram
+│   │   └── settings/           # App settings persistence
+│   │       ├── __init__.py
+│   │       └── routers.py      # GET/PUT /settings
+│   └── integrations/           # External service integrations
 │       ├── __init__.py
-│       ├── auth_service.py      # JWT (HS256), bcrypt, MongoDB user CRUD
-│       ├── dataset_service.py   # Upload, validation, cleaning, quality score, join-key detection
-│       ├── analysis.py          # Chart specs, anomalies (Z-score+IQR), forecast, SQL/pandas gen+exec, dashboard
-│       ├── chat_service.py      # Agent: intent classification → tool routing → structured narrator
-│       ├── report_service.py    # PDF (ReportLab) + DOCX (python-docx) with 2 charts, heuristic insights
-│       ├── forecast_service.py  # Advanced forecasting pipeline (Prophet + linear fallback)
-│       ├── anomaly_service.py   # Dedicated anomaly detection service
-│       ├── drive_service.py     # Google Drive upload stub
-│       └── google_drive_service.py # Google Drive API integration
-├── data/                    # Persistent storage (gitignored)
-│   ├── datasets/           # CSV files (ds_{id}.csv)
-│   ├── reports/            # Generated PDF/DOCX reports
-│   ├── meta.json           # Dataset metadata, history, settings
-│   └── history.json        # Chat/analysis history log
+│       ├── telegram/           # Telegram Bot API wrapper
+│       │   ├── __init__.py
+│       │   └── service.py      # TelegramService: send_message, test_connection
+│       └── google_drive/       # Google Drive API (stub)
+│           ├── __init__.py
+│           └── service.py
+├── data/                       # Persistent storage (gitignored)
+│   ├── datasets/               # CSV files (ds_{id}.csv)
+│   ├── reports/                # Generated PDF/DOCX reports
+│   ├── meta.json               # Dataset metadata, history, settings, automation runs, Google tokens
+│   └── history.json            # (legacy) Chat/analysis history log
 ├── requirements.txt
 ├── .env.example
-├── .env                    # (gitignored) — GROQ_API_KEY, MongoDB, JWT, CORS
-└── README.md
+├── .env                        # (gitignored) — GROQ_API_KEY, MongoDB, JWT, CORS, Telegram
+├── README.md
+└── viewduckdb.py               # Debug script
 ```
 
 ---
 
-## 2. Configuration (`app/config.py`)
+## 2. Configuration (`app/core/config.py`)
 
 ```python
 class Settings(BaseSettings):
@@ -90,100 +123,159 @@ class Settings(BaseSettings):
     google_drive_enabled: bool = False
     google_drive_credentials_path: str = ""
     google_drive_folder_id: str = ""
+
+    # Telegram (for automation + report delivery)
+    telegram_bot_token: str = ""
+    telegram_chat_id: str = ""
+
+    # Computed properties
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def datasets_dir(self) -> Path:
+        p = Path(self.data_dir) / "datasets"
+        p.mkdir(parents=True, exist_ok=True)
+        return p
+
+    @property
+    def reports_dir(self) -> Path:
+        p = Path(self.data_dir) / "reports"
+        p.mkdir(parents=True, exist_ok=True)
+        return p
+
+    @property
+    def meta_path(self) -> Path:
+        return Path(self.data_dir) / "meta.json"
+
+settings = Settings()
 ```
 
 ---
 
-## 3. Data Models (`app/models.py`)
+## 3. Data Models (`app/models/models.py`)
 
 All Pydantic models mirror `frontend/src/lib/api/types.ts` exactly.
 
 ### Core Models
 ```python
-class Dataset(BaseModel):
-    id: str                    # ds_{uuid}
+class ColumnMeta(BaseModel):
     name: str
-    type: str                  # "csv" | "pdf" | "docx" | "image"
+    dtype: str
+    unique: Optional[int] = None
+    missing: Optional[int] = None
+    is_primary_key: Optional[bool] = None
+    is_foreign_key: Optional[bool] = None
+
+class Dataset(BaseModel):
+    id: str                          # ds_{uuid}
+    name: str
+    type: str                        # "csv" | "pdf" | "docx" | "image"
     rows: int
     columns: int
     size_bytes: int
-    quality_score: float | None
+    quality_score: Optional[float] = None
     uploaded_at: str
-    status: str = "ready"
-    detected_tables: int | None = None
-    detected_text: int | None = None
-    missing_values: int | None = None
-    possible_join_keys: list[str] | None = None
+    status: Optional[str] = "ready"
+    detected_tables: Optional[int] = None
+    detected_text: Optional[int] = None
+    missing_values: Optional[int] = None
+    possible_join_keys: Optional[list[str]] = None
+
+class DatasetPreview(BaseModel):
+    columns: list[ColumnMeta]
+    rows: list[dict[str, Any]]
+    total_rows: int
+    page: int
+    page_size: int
+
+class UploadResponse(BaseModel):
+    dataset: Dataset
+```
+
+### Analysis Models
+```python
+ChartType = Literal[
+    "bar", "line", "pie", "scatter", "heatmap", "histogram",
+    "treemap", "box", "area", "radar", "bubble", "waterfall", "sunburst"
+]
 
 class ChartSpec(BaseModel):
     id: str
     title: str
-    type: str                  # bar, line, pie, scatter, histogram, area, heatmap, treemap, box, radar, bubble, waterfall, sunburst
-    description: str | None = None
-    x_key: str | None = None
-    y_keys: list[str] | None = None
+    type: str
+    description: Optional[str] = None
+    x_key: Optional[str] = None
+    y_keys: Optional[list[str]] = None
     data: list[dict[str, Any]]
-    meta: dict[str, Any] | None = None
+    meta: Optional[dict[str, Any]] = None
 
 class KPI(BaseModel):
     id: str
     label: str
     value: Any
-    delta: float | None = None
-    format: str = "number"
+    delta: Optional[float] = None
+    format: Optional[str] = "number"
 
 class DashboardResponse(BaseModel):
     kpis: list[KPI]
     charts: list[ChartSpec]
-    filters: dict[str, Any] | None = None
+    filters: Optional[dict[str, Any]] = None
+```
 
+### Chat Models
+```python
 class ChatBlock(BaseModel):
     type: str
-    text: str | None = None
-    markdown: str | None = None
-    columns: list[str] | None = None
-    rows: list[dict[str, Any]] | None = None
-    chart: ChartSpec | None = None
-    language: str | None = None
-    code: str | None = None
-    url: str | None = None
-    alt: str | None = None
-    name: str | None = None
-    status: str | None = None
+    text: Optional[str] = None
+    markdown: Optional[str] = None
+    columns: Optional[list[str]] = None
+    rows: Optional[list[dict[str, Any]]] = None
+    chart: Optional[ChartSpec] = None
+    language: Optional[str] = None
+    code: Optional[str] = None
+    url: Optional[str] = None
+    alt: Optional[str] = None
+    name: Optional[str] = None
+    status: Optional[str] = None
 
 class ExecutionStep(BaseModel):
     id: str
     label: str
     status: str              # pending | running | completed | failed
-    detail: str | None = None
+    detail: Optional[str] = None
 
 class ChatMessage(BaseModel):
     id: str
     role: str                # user | assistant | system
     created_at: str
     blocks: list[ChatBlock]
-    execution: list[ExecutionStep] | None = None
+    execution: Optional[list[ExecutionStep]] = None
 
 class ChatRequest(BaseModel):
     message: str
-    dataset_id: str | None = None      # "ds_1" | "ds_1,ds_2" | "all"
-    conversation_id: str | None = None
-    action: str | None = None           # analyze | chart | anomaly | forecast | sql | pandas | report | null
+    dataset_id: Optional[str] = None       # "ds_1" | "ds_1,ds_2" | "all"
+    conversation_id: Optional[str] = None
+    action: Optional[str] = None            # analyze | chart | anomaly | forecast | sql | pandas | report | null
 
 class ChatResponse(BaseModel):
     conversation_id: str
     message: ChatMessage
+```
 
+### Report Models
+```python
 class Report(BaseModel):
     id: str
     name: str
     created_at: str
-    dataset_id: str | None = None
-    dataset_name: str | None = None
-    url: str | None = None
-    preview_url: str | None = None
-    docx_url: str | None = None
-    drive_url: str | None = None
+    dataset_id: Optional[str] = None
+    dataset_name: Optional[str] = None
+    url: Optional[str] = None
+    preview_url: Optional[str] = None
+    docx_url: Optional[str] = None
+    drive_url: Optional[str] = None
 ```
 
 ### Auth Models
@@ -209,12 +301,12 @@ class Token(BaseModel):
     token_type: str = "bearer"
 
 class TokenData(BaseModel):
-    email: str | None = None
+    email: Optional[str] = None
 ```
 
 ---
 
-## 4. Storage Layer (`app/storage.py`)
+## 4. Storage Layer (`app/storage/storage.py`)
 
 File-based persistence (swappable for Postgres later without touching routers).
 
@@ -244,6 +336,7 @@ class Store:
     def add_report(self, record) -> dict
     def list_reports(self) -> list[dict]
     def delete_report(self, report_id) -> None
+    def get_report(self, report_id) -> Optional[dict]
     def add_history(self, record) -> None
     def list_history(self) -> list[dict]
     def add_run(self, record) -> dict
@@ -252,11 +345,19 @@ class Store:
     # Settings
     def get_settings(self) -> dict
     def update_settings(self, patch) -> dict
+
+    # Google OAuth tokens (per user)
+    def get_google_tokens(self, user_id: str) -> Optional[dict]
+    def save_google_tokens(self, user_id: str, tokens: dict) -> None
+    def update_google_tokens(self, user_id: str, tokens: dict) -> None
+    def delete_google_tokens(self, user_id: str) -> None
+
+store = Store()
 ```
 
 ---
 
-## 5. Dataset Service (`app/services/dataset_service.py`)
+## 5. Dataset Service (`app/domains/datasets/service.py`)
 
 ### `ingest_file(file: UploadFile) -> dict`
 1. **Validate** extension: CSV, TSV, Excel, PNG/JPG/JPEG/WebP/GIF/BMP
@@ -281,7 +382,7 @@ Loads and combines multiple datasets via `store.combined_df()` (auto-join or con
 
 ---
 
-## 6. Analysis Service (`app/services/analysis.py`)
+## 6. Analysis Service (`app/domains/analysis/analysis.py`)
 
 ### Chart Generation (`build_chart_spec`)
 LLM selects columns, aggregation, chart type from schema + prompt → returns `ChartSpec` with data.
@@ -290,7 +391,7 @@ LLM selects columns, aggregation, chart type from schema + prompt → returns `C
 Z-score (>3) + IQR (1.5×) on all numeric columns → flagged rows with reasons.
 
 ### Forecasting (`forecast` + `forecast_auto`)
-Advanced pipeline in `forecast_service.py`:
+Advanced pipeline in `forecasting/service.py`:
 1. LLM parses query → target feature, horizon, filters, aggregation, date column
 2. Apply filters → prepare time series (aggregate by date)
 3. Prophet (with seasonality) or linear trend fallback
@@ -301,16 +402,16 @@ LLM writes DuckDB SQL against table `df` → executed in-memory via DuckDB → r
 
 ### Pandas Code Generation + Sandbox (`generate_pandas_code`, `run_pandas_code`)
 LLM writes pandas expression on `df` → executed in restricted environment:
-- Allowed: `len, range, sum, min, max, sorted, round, abs, list, dict, enumerate, zip, str, int, float, bool, True, False, None`
-- Blocked: `import, open, exec, eval, __import__, os, sys, subprocess, requests, urllib, socket, globals, locals, input`
-- Timeout: 30s via ThreadPoolExecutor
+- **Allowed**: `len, range, sum, min, max, sorted, round, abs, list, dict, enumerate, zip, str, int, float, bool, True, False, None`
+- **Blocked**: `import, open, exec, eval, __import__, os, sys, subprocess, requests, urllib, socket, globals, locals, input`
+- **Timeout**: 30s via ThreadPoolExecutor
 
 ### Dashboard (`build_dashboard`)
 Auto-detects KPIs (total/avg per numeric col, row/col count) + 4 charts (bar, line, scatter, pie) cycling through feature pairs. Returns `DashboardResponse` with filters (date range, categorical values).
 
 ---
 
-## 7. Chat Service (`app/services/chat_service.py`)
+## 7. Chat Service (`app/domains/chat/service.py`)
 
 ### Agent Loop (`handle_chat`)
 ```python
@@ -354,7 +455,7 @@ Rules: green dot bullets (• ), emoji headers, bold metrics, markdown tables fo
 
 ---
 
-## 8. Groq Client (`app/groq_client.py`)
+## 8. Groq Client (`app/integrations/groq/client.py`)
 
 ### Model Fallback Chain
 ```python
@@ -384,7 +485,7 @@ Prompt: "Extract all tables from this image as CSV. Return ONLY the CSV."
 
 ## 9. Routers (API Endpoints)
 
-### `auth.py`
+### `auth.py` (`/auth`)
 | Method | Path | Service Call |
 |--------|------|--------------|
 | POST | `/auth/signup` | `auth_service.register_user()` |
@@ -392,7 +493,7 @@ Prompt: "Extract all tables from this image as CSV. Return ONLY the CSV."
 | GET | `/auth/me` | `get_current_user` (JWT dependency) |
 | POST | `/auth/signout` | Client-side token removal |
 
-### `datasets.py`
+### `datasets.py` (`/datasets`, `/upload`)
 | Method | Path | Service Call |
 |--------|------|--------------|
 | POST | `/upload` | `dataset_service.ingest_file()` |
@@ -401,13 +502,13 @@ Prompt: "Extract all tables from this image as CSV. Return ONLY the CSV."
 | GET | `/datasets/{id}/preview` | `dataset_service.preview()` |
 | DELETE | `/datasets/{id}` | `store.delete_dataset()` |
 
-### `chat.py`
+### `chat.py` (`/chat`, `/voice`)
 | Method | Path | Service Call |
 |--------|------|--------------|
 | POST | `/chat` | `chat_service.handle_chat()` |
 | POST | `/voice` | `chat_service.process_voice()` |
 
-### `analysis_router.py`
+### `analysis_router.py` (Analysis primitives)
 | Method | Path | Service Call |
 |--------|------|--------------|
 | POST | `/generate-chart` | `analysis.build_chart_spec()` |
@@ -427,6 +528,7 @@ Prompt: "Extract all tables from this image as CSV. Return ONLY the CSV."
 |--------|------|--------------|
 | GET | `/reports` | `store.list_reports()` |
 | DELETE | `/reports/{id}` | `store.delete_report()` |
+| POST | `/reports/{id}/send-telegram` | `telegram_service.send_document()` |
 
 ### `history.py`
 | Method | Path | Service Call |
@@ -439,9 +541,15 @@ Prompt: "Extract all tables from this image as CSV. Return ONLY the CSV."
 | GET | `/settings` | `store.get_settings()` |
 | PUT | `/settings` | `store.update_settings()` |
 
+### `automation.py` (`/automation`)
+| Method | Path | Service Call |
+|--------|------|--------------|
+| GET | `/automation` | Returns services (Gmail, Telegram, Calendar) + runs |
+| POST | `/automation` | Triggers automation (Telegram test implemented, others stubbed) |
+
 ---
 
-## 10. Report Service (`app/services/report_service.py`)
+## 10. Report Service (`app/domains/reports/service.py`)
 
 ```python
 def generate_report(dataset_id: str, prompt: str | None) -> dict:
@@ -468,7 +576,7 @@ Matplotlib rendering for bar, pie, line, histogram, scatter, with colorblind-fri
 
 ---
 
-## 11. Auth Service (`app/services/auth_service.py`)
+## 11. Auth Service (`app/domains/auth/service.py`)
 
 ```python
 class AuthService:
@@ -497,7 +605,7 @@ class AuthService:
     def get_user_by_id(self, user_id: str) -> UserResponse | None
 ```
 
-### Router Dependency (`app/routers/auth.py`)
+### Router Dependency (`app/domains/auth/routers.py`)
 ```python
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> UserResponse:
     token_data = auth_service.decode_token(credentials.credentials)
@@ -559,7 +667,7 @@ python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env
-# Edit .env → add GROQ_API_KEY, MONGODB_URL, JWT_SECRET_KEY, CORS_ORIGINS
+# Edit .env → add GROQ_API_KEY, MONGODB_URL, JWT_SECRET_KEY, CORS_ORIGINS, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -596,12 +704,13 @@ All endpoints match `frontend/src/lib/api/endpoints.ts` 1:1.
 
 | Want to add... | Where to add |
 |----------------|--------------|
-| New analysis type (clustering) | `analysis.py` + `analysis_router.py` + `models.py` + `endpoints.ts` |
-| New data source (SQL, S3, API) | `dataset_service.py` → new `ingest_*` function |
+| New analysis type (clustering) | `analysis/analysis.py` + `analysis/routers.py` + `models.py` + `endpoints.ts` |
+| New data source (SQL, S3, API) | `datasets/service.py` → new `ingest_*` function |
 | Real database | Replace `storage.py` with SQLAlchemy models |
 | Auth (JWT, OAuth) | Already implemented; add `Depends(get_current_user)` to routers |
 | Background jobs (Celery, RQ) | Move long-running tasks (report gen, forecast) to workers |
-| WebSocket streaming chat | Add `/chat/stream` WebSocket endpoint in `chat.py` |
+| WebSocket streaming chat | Add `/chat/stream` WebSocket endpoint in `chat/routers.py` |
+| Google Drive upload | Implement `integrations/google_drive/service.py` |
 
 ---
 
@@ -616,6 +725,7 @@ All endpoints match `frontend/src/lib/api/endpoints.ts` 1:1.
 | **Model fallback chain** | Auto-retry on 429/500/503 across 3 Groq models |
 | **Multi-dataset joins** | Auto-detect join keys; fallback to concat |
 | **Observability** | Execution trace in every chat response (steps, durations, inputs/outputs) |
+| **Domain-driven** | Each feature in `app/domains/{feature}/` with own service + routers |
 
 ---
 
@@ -632,6 +742,7 @@ All endpoints match `frontend/src/lib/api/endpoints.ts` 1:1.
 | MongoDB connection failed | Check `MONGODB_URL` in `.env`; ensure MongoDB running |
 | JWT errors | Verify `JWT_SECRET_KEY` in `.env` (min 32 chars) |
 | Prophet not installed | `pip install prophet` (needs C++ build tools on Windows) |
+| Telegram bot not working | Check `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` in `.env` |
 
 ---
 

@@ -1,0 +1,40 @@
+# Analysis domain package
+from .analysis import (
+    build_chart_spec,
+    detect_anomalies,
+    forecast,
+    forecast_prophet,
+    forecast_linear,
+    forecast_auto,
+    generate_pandas_code,
+    generate_sql,
+    run_pandas_code,
+    run_sql,
+    build_dashboard,
+    df_profile_text,
+    df_schema_text,
+    _safe_records,
+    CHART_TYPES,
+    CHART_PALETTE,
+)
+from .routers import router as analysis_router
+
+__all__ = [
+    "build_chart_spec",
+    "detect_anomalies",
+    "forecast",
+    "forecast_prophet",
+    "forecast_linear",
+    "forecast_auto",
+    "generate_pandas_code",
+    "generate_sql",
+    "run_pandas_code",
+    "run_sql",
+    "build_dashboard",
+    "df_profile_text",
+    "df_schema_text",
+    "_safe_records",
+    "CHART_TYPES",
+    "CHART_PALETTE",
+    "analysis_router",
+]
