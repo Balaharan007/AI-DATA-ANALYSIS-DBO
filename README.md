@@ -104,11 +104,41 @@ PDF  DOCX   Telegram Bot Upload -> (Drive,Calender)
 ```
 
 ---
-## Required config 
+## ⚙️ Required Configuration
+
+Before running the project, configure the required API key.
+
+### 1. Groq API Setup
+
+1. Create a **Groq API key** from the Groq Console.
+2. Open the `.env.example` file.
+3. Add your Groq API key:
+
+```env
+GROQ_API_KEY=your_groq_api_key_here
 ```
-CREATE A GROQ API AND UPDATE IN .env.example
-RENAME .env.example to .env 
+
+4. Rename the `.env.example` file to `.env`.
+
+> **Important:** Never commit your `.env` file to GitHub. Make sure `.env` is included in `.gitignore`.
+
+---
+
+## 🤖 Telegram Setup (Optional)
+
+Telegram integration is optional. The main application will work without it.
+
+To enable Telegram Bot integration:
+
+1. Create a Telegram bot using **BotFather**.
+2. Copy the generated bot token.
+3. Add the token to your `.env` file:
+
+```env
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
 ```
+
+If you do not want to use the Telegram integration, you can leave this configuration empty.
 
 ## 🚀 Local Deployment
 
