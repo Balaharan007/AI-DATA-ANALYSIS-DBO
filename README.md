@@ -128,17 +128,46 @@ GROQ_API_KEY=your_groq_api_key_here
 
 Telegram integration is optional. The main application will work without it.
 
-To enable Telegram Bot integration:
+### 1. Create a Telegram Bot
 
-1. Create a Telegram bot using **BotFather**.
-2. Copy the generated bot token.
-3. Add the token to your `.env` file:
+1. Open Telegram and search for **@BotFather**.
+2. Send `/newbot`.
+3. Follow the instructions to create your bot.
+4. Copy the generated **Bot Token**.
+
+### 2. Get Your Telegram Chat ID
+
+1. Open your newly created Telegram bot.
+2. Click **Start** or send any message to the bot.
+3. Open the following URL in your browser:
+
+```text
+https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates
+```
+
+Replace `<YOUR_BOT_TOKEN>` with your actual Telegram bot token.
+
+4. In the JSON response, find:
+
+```json
+"chat": {
+  "id": 123456789
+}
+```
+
+The number `123456789` is your **Telegram Chat ID**.
+
+### 3. Update the Environment Variables
+
+Add the Bot Token and Chat ID to your `.env` file:
 
 ```env
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
+TELEGRAM_CHAT_ID=your_telegram_chat_id_here
 ```
 
-If you do not want to use the Telegram integration, you can leave this configuration empty.
+> **Important:** Never share your Telegram Bot Token or commit your `.env` file to GitHub.
+
 
 ## 🚀 Local Deployment
 
