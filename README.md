@@ -106,7 +106,7 @@ PDF  DOCX   Telegram Bot Upload -> (Drive,Calender)
 ---
 ## Required config 
 ```
-CREATE A GROQ AND UPDATE IN .env.example
+CREATE A GROQ API AND UPDATE IN .env.example
 RENAME .env.example to .env 
 ```
 
