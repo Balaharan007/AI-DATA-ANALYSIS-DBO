@@ -1,5 +1,6 @@
 # Core models package
 from .models import (
+    ColumnMeta,
     Dataset,
     DatasetPreview,
     UploadResponse,
@@ -31,6 +32,7 @@ from .models import (
 )
 
 __all__ = [
+    "ColumnMeta",
     "Dataset",
     "DatasetPreview",
     "UploadResponse",

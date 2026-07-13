@@ -7,6 +7,7 @@ import pandas as pd
 from fastapi import HTTPException, UploadFile
 
 from app.integrations.groq import groq_client
+from app.models import ColumnMeta
 from app.storage import store, new_id
 from app.domains.datasets.preprocessing_service import PreprocessingService, validate_dataset, preprocess_dataset
 
@@ -92,12 +93,10 @@ async def ingest_file(
     if df.shape[0] == 0 or df.shape[1] == 0:
         raise HTTPException(422, "No usable rows/columns found in the uploaded file.")
 
-    # Run preprocessing pipeline
-    from app.models import ColumnMeta
+    # Generate dataset ID upfront so preprocessing report uses the same ID
     ds_id = new_id("ds_")
-    print(f"DEBUG: Using new_id = {ds_id}")
 
-    # Preprocess the dataset
+    # Preprocess the dataset with the pre-generated ID
     cleaned_df, report = preprocess_dataset(df, ds_id, name, auto_clean, aggressive_clean)
 
     # Calculate quality score
@@ -112,7 +111,8 @@ async def ingest_file(
         "detected_tables": 1,
         "preprocessing_report": report.__dict__,
     }
-    record = store.add_dataset(cleaned_df, name=name, dtype=dtype, extra=extra)
+    # Use the pre-generated ds_id to ensure consistency with preprocessing report
+    record = store.add_dataset(cleaned_df, name=name, dtype=dtype, extra=extra, ds_id=ds_id)
 
     store.add_history(
         {

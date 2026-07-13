@@ -178,6 +178,8 @@ def _detect_anomalies_iqr(data: pd.DataFrame, multiplier: float = 1.5) -> tuple[
         series = data[col]
         q1, q3 = series.quantile(0.25), series.quantile(0.75)
         iqr = q3 - q1
+        if iqr == 0 or pd.isna(iqr):
+            continue
         lower, upper = q1 - multiplier * iqr, q3 + multiplier * iqr
         col_labels = np.where((series < lower) | (series > upper), -1, 1)
         labels = np.minimum(labels, col_labels)
@@ -319,6 +321,10 @@ def detect_anomalies(
         # Sort by anomaly score (most anomalous first)
         full_anomalies = full_anomalies.nsmallest(max_anomalies, "_anomaly_score")
 
+    # Sanitize anomalies data to ensure JSON-safe values
+    clean_anomalies = full_anomalies.replace([np.inf, -np.inf], np.nan)
+    clean_anomalies = clean_anomalies.astype(object).where(pd.notnull(clean_anomalies), None)
+
     # Build chart
     chart_spec = _build_anomaly_chart_spec(
         work_df, result_df, available_cols, method, filters
@@ -348,7 +354,7 @@ def detect_anomalies(
         "total_records": total_count,
         "anomaly_count": anomaly_count,
         "anomaly_percentage": pct,
-        "anomalies": full_anomalies.to_dict(orient="records"),
+        "anomalies": clean_anomalies.to_dict(orient="records"),
         "chart": chart_spec,
         "explanation": explanation,
     }

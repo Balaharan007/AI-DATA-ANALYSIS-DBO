@@ -22,9 +22,7 @@ async def list_automation():
         last_by_service.setdefault(r["service"], r["created_at"])
 
     services = [
-        {"id": "gmail", "name": "gmail", "label": "Gmail", "connected": False},
         {"id": "telegram", "name": "telegram", "label": "Telegram", "connected": _get_telegram_connected()},
-        {"id": "calendar", "name": "calendar", "label": "Calendar", "connected": False},
     ]
     return {"services": services, "runs": runs}
 
@@ -32,7 +30,7 @@ async def list_automation():
 @router.post("/automation")
 async def run_automation(payload: dict = Body(...)):
     service = payload.get("service")
-    valid_services = {"gmail", "telegram", "calendar"}
+    valid_services = {"telegram"}
     if service not in valid_services:
         raise HTTPException(400, f"Unknown automation service '{service}'.")
 
@@ -45,10 +43,8 @@ async def run_automation(payload: dict = Body(...)):
             raise HTTPException(500, "Failed to send Telegram message")
         message = "Telegram test message sent successfully"
     else:
-        # NOTE: this is a functional stub. Wire this up to your n8n webhook / Gmail API /
-        # Google Calendar API calls here. For example, POST to an n8n webhook URL configured
-        # per-service via environment variables.
-        message = f"{service} automation triggered (stub — connect a real integration in app/domains/automation/routers.py)."
+        # This shouldn't be reached due to validation above
+        raise HTTPException(400, f"Automation service '{service}' is not implemented.")
 
     run = {
         "id": new_id("run_"),

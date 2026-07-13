@@ -41,28 +41,23 @@ frontend/.output/
 frontend/dist/
 frontend/build/
 frontend/.vite/
+frontend/.wrangler/
 frontend/*.log
 frontend/.env
 frontend/.env.local
 frontend/.env.*.local
 frontend/.DS_Store
 
-# Docker
-Dockerfile*
-docker-compose*.yml
-.dockerignore
-
-# Documentation (optional - keep if you want docs in image)
-# *.md
-# !README.md
-
-# Test outputs
-*.xml
-*.json
+# Repo-root extras not needed in the image
+img_video_link/
+Sample_dataset/
+zip/
+*.md
+*.zip
+bash.exe.stackdump
 
 # Misc
 *.tar.gz
-*.zip
 *.bak
 *.tmp
 *.temp

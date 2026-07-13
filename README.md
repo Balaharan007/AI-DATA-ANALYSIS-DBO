@@ -9,18 +9,18 @@
 
 ## 🛠️ Tech Stack
 
-| Layer | Technologies |
-|---|---|
-| **Frontend** | React, Recharts, Plotly |
-| **Backend** | FastAPI, Python, Uvicorn |
-| **AI / LLM** | Groq LLM |
-| **Data Analysis** | Pandas, DuckDB |
-| **Machine Learning** | Scikit-learn, Prophet |
-| **Database** | MongoDB |
-| **Authentication** | JWT (JSON Web Tokens) |
-| **Report Generation** | PDF, DOCX |
-| **Integration** | Telegram Bot • Google Drive • Gmail • Google Calendar |
-| **Deployment** | Docker, Docker Compose |
+| Layer                 | Technologies                                          |
+| --------------------- | ----------------------------------------------------- |
+| **Frontend**          | React, Recharts, Plotly                               |
+| **Backend**           | FastAPI, Python, Uvicorn                              |
+| **AI / LLM**          | Groq LLM                                              |
+| **Data Analysis**     | Pandas, DuckDB                                        |
+| **Machine Learning**  | Scikit-learn, Prophet                                 |
+| **Database**          | MongoDB                                               |
+| **Authentication**    | JWT (JSON Web Tokens)                                 |
+| **Report Generation** | PDF, DOCX                                             |
+| **Integration**       | Telegram Bot • Google Drive • Gmail • Google Calendar |
+| **Deployment**        | Docker, Docker Compose                                |
 
 ---
 
@@ -130,7 +130,8 @@ npm run dev
 
 ```bash
 # Build & run with docker-compose
-docker compose --env-file backend/.env up --build
+docker compose --env-file backend/.env up -d --build
+docker-compose up -d --build
 
 # Services:
 # - Frontend: http://localhost:5173
@@ -140,6 +141,7 @@ docker compose --env-file backend/.env up --build
 ```
 
 **Required env vars for Docker:**
+
 ```bash
 GROQ_API_KEY=your_groq_key
 MONGODB_URL=mongodb://mongodb:27017
@@ -151,41 +153,41 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 flowchart TB
     subgraph DockerCompose [🐳 docker-compose.yml]
         direction TB
-        
+
         subgraph Net [🌐 insight-network]
             direction TB
-            
+
             Mongo[(MongoDB<br/>mongo:7<br/>Port 27017)]
-            
+
             Backend[Backend<br/>FastAPI + Uvicorn<br/>Port 8000<br/>Python 3.11-slim]
-            
+
             Frontend[Frontend<br/>TanStack Start SSR<br/>Port 5173<br/>Node 20-alpine]
         end
     end
-    
+
     User((👤 User)) -->|HTTPS :5173| Frontend
     Frontend -->|REST API :8000| Backend
     Backend -->|Auth + Settings| Mongo
     Backend -->|LLM/Vision/Whisper| Groq[Groq Cloud API]
     Backend -.->|Optional Reports| Telegram[Telegram Bot]
-    
+
     %% Build Process
     subgraph Build [🔨 Multi-stage Build]
         direction LR
         B1[Frontend Builder<br/>node:20-alpine<br/>npm ci → npm run build] --> B2[Frontend Runtime<br/>node:20-alpine<br/>.output/ + server]
         B3[Backend Builder<br/>python:3.11-slim<br/>pip install --user] --> B4[Backend Runtime<br/>python:3.11-slim<br/>Copy .local + source]
     end
-    
+
     B2 --> Frontend
     B4 --> Backend
-    
+
     classDef user fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px;
     classDef frontend fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
     classDef backend fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
     classDef db fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
     classDef ext fill:#fff3e0,stroke:#ef6c00,stroke-width:2px;
     classDef build fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,stroke-dasharray: 5 5;
-    
+
     class User user;
     class Frontend frontend;
     class Backend backend;
@@ -208,7 +210,8 @@ TELEGRAM_CHAT_ID=6798365742
 EOF
 
 # 2. Build and start all services
-docker compose --env-file backend/.env up --build
+docker compose --env-file backend/.env up -d --build
+docker-compose up -d --build
 
 # 3. Access the application
 # Frontend: http://localhost:5173
@@ -218,11 +221,11 @@ docker compose --env-file backend/.env up --build
 
 ### Docker Services Overview
 
-| Service | Image | Ports | Depends On | Health Check |
-|---------|-------|-------|------------|--------------|
-| `mongodb` | `mongo:7` | 27017 | - | `db.runCommand("ping")` |
-| `backend` | Built from `Dockerfile` | 8000 | mongodb | `GET /health` |
-| `frontend` | Built from `Dockerfile.frontend` | 5173 | backend | `GET /` |
+| Service    | Image                            | Ports | Depends On | Health Check            |
+| ---------- | -------------------------------- | ----- | ---------- | ----------------------- |
+| `mongodb`  | `mongo:7`                        | 27017 | -          | `db.runCommand("ping")` |
+| `backend`  | Built from `Dockerfile`          | 8000  | mongodb    | `GET /health`           |
+| `frontend` | Built from `Dockerfile.frontend` | 5173  | backend    | `GET /`                 |
 
 ### Docker Files in Project
 
@@ -239,23 +242,23 @@ insight-engine/
 
 ## 🔑 Required Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `GROQ_API_KEY` | Groq API key for LLM/Vision/Whisper | ✅ Yes |
-| `MONGODB_URL` | MongoDB connection string | ✅ Yes |
-| `JWT_SECRET_KEY` | HS256 signing key (min 32 chars) | ✅ Yes |
-| `CORS_ORIGINS` | Comma-separated frontend origins | ✅ Yes |
-| `TELEGRAM_BOT_TOKEN` | Bot token from @BotFather | ✅ Yes |
-| `TELEGRAM_CHAT_ID` | Chat/group/channel ID to send files to | ✅ Yes |
+| Variable             | Description                            | Required |
+| -------------------- | -------------------------------------- | -------- |
+| `GROQ_API_KEY`       | Groq API key for LLM/Vision/Whisper    | ✅ Yes   |
+| `MONGODB_URL`        | MongoDB connection string              | ✅ Yes   |
+| `JWT_SECRET_KEY`     | HS256 signing key (min 32 chars)       | ✅ Yes   |
+| `CORS_ORIGINS`       | Comma-separated frontend origins       | ✅ Yes   |
+| `TELEGRAM_BOT_TOKEN` | Bot token from @BotFather              | ✅ Yes   |
+| `TELEGRAM_CHAT_ID`   | Chat/group/channel ID to send files to | ✅ Yes   |
 
 ---
 
 ## 📚 Deep-Dive Documentation
 
-| Document | Focus |
-|----------|-------|
-| [`PROCESS_OF_BACKEND.md`](./PROCESS_OF_BACKEND.md) | Config, models, storage, all 8 services, routers, Groq client, auth, sandbox, deployment |
+| Document                                             | Focus                                                                                     |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| [`PROCESS_OF_BACKEND.md`](./PROCESS_OF_BACKEND.md)   | Config, models, storage, all 8 services, routers, Groq client, auth, sandbox, deployment  |
 | [`PROCESS_OF_FRONTEND.md`](./PROCESS_OF_FRONTEND.md) | Routing, TanStack Query, component system, page flows, API contract, patterns, deployment |
-| [`PROJECT_SUMMARY.md`](./PROJECT_SUMMARY.md) | Full conversation history, tech stack, API overview, troubleshooting |
+| [`PROJECT_SUMMARY.md`](./PROJECT_SUMMARY.md)         | Full conversation history, tech stack, API overview, troubleshooting                      |
 
 ---

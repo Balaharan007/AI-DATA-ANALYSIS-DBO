@@ -1,4 +1,6 @@
 from pathlib import Path
+import pandas as pd
+import duckdb
 
 dataset_dir = Path(r"C:\insight-engine\backend\data\datasets")
 

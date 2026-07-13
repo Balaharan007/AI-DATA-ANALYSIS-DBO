@@ -171,6 +171,15 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <AuthGate />
+        {/*
+          FIX: Toaster moved out of the "authenticated" branch of AuthGate
+          and up here, so it's mounted on every screen — including the
+          sign-in / sign-up modal. Previously toast.error()/toast.success()
+          calls fired from AuthContext during login/signup had nowhere to
+          render, so failures (wrong password, duplicate email, network
+          errors, etc.) appeared to do nothing.
+        */}
+        <Toaster richColors position="top-right" />
       </AuthProvider>
     </QueryClientProvider>
   );
@@ -203,7 +212,6 @@ function AuthGate() {
           <Outlet />
         </main>
       </SidebarInset>
-      <Toaster richColors position="top-right" />
     </SidebarProvider>
   );
 }

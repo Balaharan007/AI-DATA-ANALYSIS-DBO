@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from typing import Optional
-
+import math
+import numpy as np
 import pandas as pd
 from fastapi import HTTPException
 
@@ -79,6 +80,30 @@ def _narrate(question: str, context: str, conv_id: str) -> str:
     ]
     return groq_client.chat_completion(messages, temperature=0.4, max_tokens=900)
 
+def _sanitize_json(value):
+    if isinstance(value, dict):
+        return {str(k): _sanitize_json(v) for k, v in value.items()}
+
+    if isinstance(value, (list, tuple)):
+        return [_sanitize_json(v) for v in value]
+
+    if isinstance(value, (float, np.floating)):
+        value = float(value)
+        return value if math.isfinite(value) else None
+
+    if isinstance(value, np.integer):
+        return int(value)
+
+    if isinstance(value, np.bool_):
+        return bool(value)
+
+    if isinstance(value, pd.Timestamp):
+        return value.isoformat()
+
+    if value is pd.NA:
+        return None
+
+    return value
 
 def handle_chat(message: str, dataset_id: Optional[str], conversation_id: Optional[str], action: Optional[str], user_id: Optional[str] = None) -> dict:
     conv_id = conversation_id or new_id("conv_")
@@ -102,7 +127,9 @@ def handle_chat(message: str, dataset_id: Optional[str], conversation_id: Option
             }
         )
         steps.append(_step("done", "Waiting for dataset", "failed"))
-        return _finish(conv_id, message, blocks, steps)
+        return _sanitize_json(
+            _finish(conv_id, message, blocks, steps)
+        )
 
     try:
         if intent == "chart":
@@ -211,7 +238,7 @@ def handle_chat(message: str, dataset_id: Optional[str], conversation_id: Option
             report = report_service.generate_report(ds_id, message, user_id)
             steps[-1]["status"] = "completed"
 
-            base_url = "http://localhost:8000"
+            base_url = "http://localhost:3000"
             full_download_url = f"{base_url}{report['url']}"
             blocks.append(
                 {
@@ -237,7 +264,9 @@ def handle_chat(message: str, dataset_id: Optional[str], conversation_id: Option
         steps.append(_step("error", "Something went wrong", "failed", detail=str(e)))
         blocks.append({"type": "text", "text": f"I ran into an error while working on that: {e}"})
 
-    return _finish(conv_id, message, blocks, steps)
+    return _sanitize_json(
+        _finish(conv_id, message, blocks, steps)
+    )
 
 
 def _finish(conv_id: str, user_message: str, blocks: list[dict], steps: list[dict]) -> dict:

@@ -8,11 +8,12 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
-# Install system dependencies for building
+# Install system build dependencies (gcc/g++/make needed for prophet's cmdstanpy backend)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     g++ \
-    libpq-dev \
+    make \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
@@ -28,7 +29,6 @@ FROM python:3.11-slim AS runtime
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -55,9 +55,12 @@ ENV PATH=/home/appuser/.local/bin:$PATH
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-EXPOSE 8000
+EXPOSE 3000
+
+WORKDIR /app/backend
+
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:3000/health || exit 1
 
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3000"]

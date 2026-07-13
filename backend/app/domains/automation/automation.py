@@ -7,9 +7,7 @@ from ..storage import new_id, now_iso, store
 router = APIRouter(tags=["automation"])
 
 SERVICES = [
-    {"id": "gmail", "name": "gmail", "label": "Gmail", "connected": False},
     {"id": "telegram", "name": "telegram", "label": "Telegram", "connected": False},
-    {"id": "calendar", "name": "calendar", "label": "Calendar", "connected": False},
 ]
 
 
@@ -28,14 +26,12 @@ async def run_automation(payload: dict = Body(...)):
     service = payload.get("service")
     if service not in {s["name"] for s in SERVICES}:
         raise HTTPException(400, f"Unknown automation service '{service}'.")
-    # NOTE: this is a functional stub. Wire this up to your n8n webhook / Gmail API /
-    # Google Calendar API calls here. For example, POST to an n8n webhook URL configured
-    # per-service via environment variables.
+    # NOTE: this is a functional stub. Wire this up to your n8n webhook / Telegram API
     run = {
         "id": new_id("run_"),
         "service": service,
         "status": "success",
         "created_at": now_iso(),
-        "message": f"{service} automation triggered (stub — connect a real integration in app/routers/automation.py).",
+        "message": f"{service} automation triggered (stub — connect a real integration in app/domains/automation/automation.py).",
     }
     return store.add_run(run)

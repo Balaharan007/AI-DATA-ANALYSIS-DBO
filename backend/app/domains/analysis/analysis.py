@@ -43,8 +43,9 @@ def df_profile_text(df: pd.DataFrame) -> str:
 
 
 def _safe_records(df: pd.DataFrame) -> list[dict]:
-    return df.where(pd.notnull(df), None).to_dict(orient="records")
-
+    clean_df = df.replace([np.inf, -np.inf], np.nan)
+    clean_df = clean_df.astype(object).where(pd.notnull(clean_df), None)
+    return clean_df.to_dict(orient="records")
 
 # ---------------------------------------------------------------------------
 # Pandas / SQL execution sandboxes

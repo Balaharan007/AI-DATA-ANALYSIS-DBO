@@ -66,9 +66,10 @@ class Store:
         self.meta_path.write_text(json.dumps(self._data, indent=2, default=str))
 
     # ---------- datasets ----------
-    def add_dataset(self, df: pd.DataFrame, name: str, dtype: str, extra: Optional[dict] = None) -> dict:
+    def add_dataset(self, df: pd.DataFrame, name: str, dtype: str, extra: Optional[dict] = None, ds_id: Optional[str] = None) -> dict:
         with _lock:
-            ds_id = new_id("ds_")
+            if ds_id is None:
+                ds_id = new_id("ds_")
             csv_path = settings.datasets_dir / f"{ds_id}.csv"
             df.to_csv(csv_path, index=False)
             self._dataframes[ds_id] = df
@@ -184,41 +185,6 @@ class Store:
             self._data["settings"].update({k: v for k, v in patch.items() if v is not None})
             self._save()
             return self._data["settings"]
-
-    # ---------- Google OAuth tokens ----------
-    def get_google_tokens(self, user_id: str) -> Optional[dict]:
-        """Get Google OAuth tokens for a user."""
-        return self._data.get("google_tokens", {}).get(user_id)
-
-    def save_google_tokens(self, user_id: str, tokens: dict) -> None:
-        """Save Google OAuth tokens for a user."""
-        with _lock:
-            if "google_tokens" not in self._data:
-                self._data["google_tokens"] = {}
-            self._data["google_tokens"][user_id] = {
-                **tokens,
-                "updated_at": now_iso()
-            }
-            self._save()
-
-    def update_google_tokens(self, user_id: str, tokens: dict) -> None:
-        """Update Google OAuth tokens for a user (merge with existing)."""
-        with _lock:
-            if "google_tokens" not in self._data:
-                self._data["google_tokens"] = {}
-            existing = self._data["google_tokens"].get(user_id, {})
-            self._data["google_tokens"][user_id] = {
-                **existing,
-                **tokens,
-                "updated_at": now_iso()
-            }
-            self._save()
-
-    def delete_google_tokens(self, user_id: str) -> None:
-        """Delete Google OAuth tokens for a user."""
-        with _lock:
-            self._data.get("google_tokens", {}).pop(user_id, None)
-            self._save()
 
 
 store = Store()

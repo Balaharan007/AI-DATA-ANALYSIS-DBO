@@ -4,18 +4,29 @@
 # =============================================================================
 # STAGE 1: Build frontend
 # =============================================================================
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY frontend/package.json frontend/package-lock.json* ./
+# Build-time arg: Vite bakes this into the client bundle at build, so it must
+# be passed as a build ARG (not a runtime env var) — see docker-compose.yml
+ARG VITE_API_BASE_URL=http://localhost:3000
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
+# Copy package files (no lockfile exists in this repo, so `npm install` not `npm ci`)
+COPY frontend/package.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 # Copy frontend source
 COPY frontend/ .
+
+# IMPORTANT: the project's vite config (via @lovable.dev/vite-tanstack-config)
+# defaults Nitro's build target to "cloudflare-module" (a Cloudflare Workers
+# fetch handler, not a Node HTTP server). Force the Node preset here so the
+# built .output/server/index.mjs is a real, listening Node server.
+ENV NITRO_PRESET=node-server
 
 # Build frontend (TanStack Start)
 RUN npm run build
@@ -23,7 +34,7 @@ RUN npm run build
 # =============================================================================
 # STAGE 2: Production runtime
 # =============================================================================
-FROM node:20-alpine AS runtime
+FROM node:22-alpine AS runtime
 
 WORKDIR /app
 
