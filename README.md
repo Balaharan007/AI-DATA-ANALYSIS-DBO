@@ -130,7 +130,7 @@ npm run dev
 
 ```bash
 # Build & run with docker-compose
-docker-compose up -d --build
+docker compose --env-file backend/.env up --build
 
 # Services:
 # - Frontend: http://localhost:5173
@@ -208,7 +208,7 @@ TELEGRAM_CHAT_ID=6798365742
 EOF
 
 # 2. Build and start all services
-docker-compose up -d --build
+docker compose --env-file backend/.env up --build
 
 # 3. Access the application
 # Frontend: http://localhost:5173
@@ -233,20 +233,6 @@ insight-engine/
 ├── docker-compose.yml      # Orchestration (Mongo + Backend + Frontend)
 ├── docker-entrypoint.sh    # Startup script (not used in compose)
 └── .dockerignore           # Build context exclusions
-```
-
-### Environment Variables for Docker
-
-```bash
-# Required
-GROQ_API_KEY=gsk_xxxxxxxxxxxx
-MONGODB_URL=mongodb://mongodb:27017
-JWT_SECRET_KEY=your-32-char-minimum-secret-key
-CORS_ORIGINS=http://localhost:5173,http://localhost:3000
-
-# Telegram Bot (for report delivery)
-TELEGRAM_BOT_TOKEN=8974667061:AAH49-xxxxxxxxxxxxxxx-xxxxxxxxxxxxx
-TELEGRAM_CHAT_ID=6798365742
 ```
 
 ---
