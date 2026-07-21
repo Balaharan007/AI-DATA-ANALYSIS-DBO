@@ -213,25 +213,6 @@ JWT_SECRET_KEY=your_32_char_min_secret
 CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 ```
 
-### Docker Services Overview
-
-| Service    | Image                            | Ports | Depends On | Health Check            |
-| ---------- | -------------------------------- | ----- | ---------- | ----------------------- |
-| `mongodb`  | `mongo:7`                        | 27017 | -          | `db.runCommand("ping")` |
-| `backend`  | Built from `Dockerfile`          | 8000  | mongodb    | `GET /health`           |
-| `frontend` | Built from `Dockerfile.frontend` | 5173  | backend    | `GET /`                 |
-
-### Docker Files in Project
-
-```
-insight-engine/
-├── Dockerfile              # Backend (FastAPI) - multi-stage
-├── Dockerfile.frontend     # Frontend (TanStack Start) - multi-stage
-├── docker-compose.yml      # Orchestration (Mongo + Backend + Frontend)
-├── docker-entrypoint.sh    # Startup script (not used in compose)
-└── .dockerignore           # Build context exclusions
-```
-
 ---
 
 ## 🔑 Required Environment Variables
